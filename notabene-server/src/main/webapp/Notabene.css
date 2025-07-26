@@ -1,0 +1,141 @@
+
+body {
+    padding: 10px;
+    font-family: Arial, sans-serif;
+}
+
+.watchListHeader {
+    background-color: #2062BB;
+    color: white;
+    font-style: italic;
+}
+
+.watchList {
+    border: 1px solid silver;
+    padding: 2px;
+    margin-bottom: 6px;
+}
+
+.watchListNumericColumn {
+    text-align: right;
+    width: 8em;
+}
+
+.watchListRemoveColumn {
+  text-align: center;
+}
+
+.addPanel {
+  margin: 10px 0px 15px 0px;
+}
+
+.gwt-Button-remove {
+  width: 50px;
+}
+
+.noChange {
+  color: black;
+}
+
+.positiveChange {
+  color: green;
+}
+
+.negativeChange {
+  color: red;
+}
+
+.errorMessage {
+  color: red;
+}
+
+/* Stili per la homepage */
+.welcome-message {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2062BB;
+  margin-bottom: 30px;
+}
+
+.home-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  margin: 10px;
+  background-color: #2062BB;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.home-button:hover {
+  background-color: #1a4d99;
+}
+
+/* Stili per i form */
+.form-title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #2062BB;
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.form-input {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: 250px;
+  margin-bottom: 10px;
+}
+
+.form-input:focus {
+  border-color: #2062BB;
+  outline: none;
+}
+
+.form-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 15px 5px 5px 5px;
+  min-width: 180px;
+  transition: background-color 0.3s;
+}
+
+.form-button:hover {
+  background-color: #218838;
+}
+
+.form-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.back-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.back-button:hover {
+  background-color: #5a6268;
+}

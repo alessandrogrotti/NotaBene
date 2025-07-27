@@ -43,11 +43,29 @@ public class NotaBene implements EntryPoint {
     private TextBox surnameRegBox = new TextBox();
     private Button confirmRegButton = new Button("Conferma Registrazione");
     private Button backFromRegButton = new Button("Torna alla Home");
+
+    // Elementi del form di login
+    private Label loginTitle = new Label("Accesso");
+    private Label usernameLoginLabel = new Label("Username:");
+    private TextBox usernameLoginBox = new TextBox();
+    private Label passwordLoginLabel = new Label("Password:");
+    private PasswordTextBox passwordLoginBox = new PasswordTextBox();
+    private Button confirmLoginButton = new Button("Accedi");
+    private Button backFromLoginButton = new Button("Torna alla Home");
+   
+    // Utente loggato
+    private User currentUser = null;
+ 
+    // Pulsanti x pagina dopo login
+    private Button viewNotesButton = new Button("Vedi elenco note");
+    private Button addNoteButton = new Button("Aggiungi nota");
     
 //ENTRY POINT HOME PAGE BASIC
     public void onModuleLoad() {
         setupHomePage();
         setupRegistrationForm();
+        setupLoginForm();
+        showHomePage();
     }
     
     //Set up homepage con due pulsanti per registrazione e futuro 
@@ -119,7 +137,47 @@ public class NotaBene implements EntryPoint {
             }
         });
     }
-    
+
+    private void setupLoginForm() {
+        // Configurazione pannello
+        loginPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+        loginPanel.setSpacing(15);
+        loginPanel.setWidth("100%");
+
+        // Stili
+        loginTitle.setStyleName("form-title");
+        usernameLoginLabel.setStyleName("form-label");
+        passwordLoginLabel.setStyleName("form-label");
+        
+        usernameLoginBox.setStyleName("form-input");
+        passwordLoginBox.setStyleName("form-input");
+        
+        confirmLoginButton.setStyleName("form-button");
+        backFromLoginButton.setStyleName("back-button");
+        
+        loginPanel.add(loginTitle);
+        loginPanel.add(usernameLoginLabel);
+        loginPanel.add(usernameLoginBox);
+        loginPanel.add(passwordLoginLabel);
+        loginPanel.add(passwordLoginBox);
+        loginPanel.add(confirmLoginButton);
+        loginPanel.add(backFromLoginButton);
+        
+        // Event handlers
+        confirmLoginButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                handleLogin();
+            }
+        });
+       
+        backFromLoginButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showHomePage();
+            }
+        });
+    }
   
     private void showHomePage() {
         RootPanel.get("list").clear();
@@ -127,12 +185,20 @@ public class NotaBene implements EntryPoint {
         homePanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         homePanel.setSpacing(20);
         homePanel.setWidth("100%");
-        
+
+         if (currentUser == null) {
+            // Utente non autenticato: mostra pulsanti di accesso e registrazione
             welcomeLabel.setText("Benvenuto nella nostra applicazione!");
             homePanel.add(welcomeLabel);
             homePanel.add(registerButton);
             homePanel.add(loginButton);
-        
+        } else {
+            // Utente autenticato: mostra pulsanti note
+            welcomeLabel.setText("Benvenuto, " + currentUser.getName() + " " + currentUser.getSurname() + "!");
+            homePanel.add(welcomeLabel);
+            homePanel.add(viewNotesButton);
+            homePanel.add(addNoteButton);
+        }
         RootPanel.get("list").add(homePanel);
     }
     
@@ -188,6 +254,65 @@ public class NotaBene implements EntryPoint {
             }
         });
     }
+
+    // Mostra il form di login
+    private void showLoginForm() {
+        RootPanel.get("list").clear();
+        RootPanel.get("list").add(loginPanel);
+    }
+ 
+    //Gestisce il login dell'utente
+    private void handleLogin() {
+        String username = usernameLoginBox.getText().trim();
+        String password = passwordLoginBox.getText();
+       
+        // Validazione base
+        if (username.isEmpty() || password.isEmpty()) {
+            Window.alert("Username e password sono obbligatori!");
+            return;
+        }
+       
+        // Disabilita il pulsante per evitare doppi invii
+        confirmLoginButton.setEnabled(false);
+        confirmLoginButton.setText("Accesso in corso...");
+       
+        // Chiama il servizio per autenticare l'utente
+        userService.authenticateUser(username, password, new AsyncCallback<User>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                // Riabilita il pulsante
+                confirmLoginButton.setEnabled(true);
+                confirmLoginButton.setText("Accedi");
+               
+                // Mostra l'errore
+                Window.alert("Errore durante l'accesso: " + caught.getMessage());
+            }
+           
+            @Override
+            public void onSuccess(User result) {
+                // Riabilita il pulsante
+                confirmLoginButton.setEnabled(true);
+                confirmLoginButton.setText("Accedi");
+               
+                if (result != null) {
+                    Window.alert("Accesso effettuato con successo!\n" +
+                               "Benvenuto " + result.getName() + " " + result.getSurname() + "!");
+                    // Pulisci i campi e mostra la home post-login
+                    clearLoginForm();
+                    currentUser = result;
+                    showHomePage();
+                } else {
+                    Window.alert("Username o password non corretti!");
+                }
+            }
+        });
+    }
+
+    //Pulisce i campi del form di login
+    private void clearLoginForm() {
+        usernameLoginBox.setText("");
+        passwordLoginBox.setText("");
+    }
     
     private void clearRegistrationForm() {
         usernameRegBox.setText("");
@@ -207,7 +332,7 @@ public class NotaBene implements EntryPoint {
         loginButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                //todo
+                showLoginForm();
             }
         });
     }

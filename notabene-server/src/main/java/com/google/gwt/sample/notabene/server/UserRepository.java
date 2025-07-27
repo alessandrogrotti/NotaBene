@@ -94,6 +94,24 @@ public class UserRepository {
         }
     }
 
+    public User authenticateUser(String username, String password) {
+        if (username == null || password == null ||
+            username.trim().isEmpty() || password.trim().isEmpty()) {
+            return null;
+        }
+       
+        try {
+            User user = usersMap.get(username);
+            if (user != null && password.equals(user.getPassword())) {
+                return user;
+            }
+            return null;
+        } catch (Exception e) {
+            System.err.println("Errore nell'autenticazione dell'utente: " + e.getMessage());
+            return null;
+        }
+    }
+
     public void close() {
         if (db != null && !db.isClosed()) {
             try {
@@ -147,6 +165,16 @@ public class UserRepository {
             System.out.println("=========================");
         } catch (Exception e) {
             System.err.println("Errore nella stampa degli utenti: " + e.getMessage());
+        }
+    }
+
+    public void clear() {
+        try {
+            usersMap.clear();
+            db.commit();
+        } catch (Exception e) {
+            System.err.println("Errore nella pulizia del database: " + e.getMessage());
+            db.rollback();
         }
     }
 }

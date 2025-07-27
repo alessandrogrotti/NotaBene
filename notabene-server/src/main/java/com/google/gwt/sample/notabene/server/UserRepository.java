@@ -167,4 +167,14 @@ public class UserRepository {
             System.err.println("Errore nella stampa degli utenti: " + e.getMessage());
         }
     }
+
+    public void clear() {
+        try {
+            usersMap.clear();
+            db.commit();
+        } catch (Exception e) {
+            System.err.println("Errore nella pulizia del database: " + e.getMessage());
+            db.rollback();
+        }
+    }
 }

@@ -8,4 +8,6 @@ public interface UserServiceAsync {
     void registerUser(User user, AsyncCallback<Boolean> callback);
 
     void isUsernameExists(String username, AsyncCallback<Boolean> callback);
+
+    void authenticateUser(String username, String password, AsyncCallback<User> callback);
 }

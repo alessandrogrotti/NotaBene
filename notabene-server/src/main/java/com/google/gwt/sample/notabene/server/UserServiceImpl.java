@@ -77,6 +77,55 @@ public class UserServiceImpl extends RemoteServiceServlet implements UserService
             throw new IllegalArgumentException("Errore durante la registrazione dell'utente");
         }
     }
+
+    @Override
+    public User authenticateUser(String username, String password) {
+        // Validazione dei parametri
+        if (username == null || username.trim().isEmpty()) {
+            return null;
+        }
+       
+        if (password == null || password.trim().isEmpty()) {
+            return null;
+        }
+       
+        try {
+            User storedUser = userRepository.getUser(username);
+           
+            if (storedUser != null) {
+                System.out.println("=== PASSWORD VERIFICATION ===");
+                System.out.println("Password inserita: " + password);
+                System.out.println("Hash memorizzato: " + storedUser.getPassword());
+               
+                // Verifica la password usando Password4j
+                boolean verified = Password.check(password, storedUser.getPassword()).withBcrypt();
+               
+                System.out.println("Verifica password: " + (verified ? "SUCCESSO" : "FALLIMENTO"));
+                System.out.println("=============================");
+               
+                if (verified) {
+                    System.out.println("Utente autenticato con successo: " + username);
+                    // Crea una copia dell'utente senza la password per sicurezza
+                    User safeUser = new User(
+                        storedUser.getUsername(),
+                        null, // Non inviamo la password al client
+                        storedUser.getName(),
+                        storedUser.getSurname()
+                    );
+                    return safeUser;
+                } else {
+                    System.out.println("Tentativo di autenticazione fallito per: " + username);
+                    return null;
+                }
+            } else {
+                System.out.println("Utente non trovato: " + username);
+                return null;
+            }
+        } catch (Exception e) {
+            System.err.println("Errore durante l'autenticazione: " + e.getMessage());
+            return null;
+        }
+    }
     
     @Override
     public boolean isUsernameExists(String username) {

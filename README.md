@@ -2,8 +2,11 @@
 
 Progetto svolto per l'esame di Ingegneria del Software del corso di Informatica per il Management a.a. 2024/2025
 
+cd gwt-notabene-maven;
 mvn -U -e gwt:codeserver -pl notabene-client -am
 
+
+cd gwt-notabene-maven;
 mvn -U jetty:run -pl notabene-server -am -Denv=dev
 
 to run the application in developer mode (the URL is `http://localhost:8080/`). 

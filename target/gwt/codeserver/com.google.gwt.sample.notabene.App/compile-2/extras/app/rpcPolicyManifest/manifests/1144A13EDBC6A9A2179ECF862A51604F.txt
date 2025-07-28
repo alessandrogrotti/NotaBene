@@ -1,2 +1,0 @@
-serviceClass: com.google.gwt.sample.notabene.shared.UserService
-path: E0B2C4AC3E070D99B704159757B17AA9.gwt.rpc

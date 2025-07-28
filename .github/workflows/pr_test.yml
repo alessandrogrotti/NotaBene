@@ -1,0 +1,31 @@
+# Action per GitHub per eseguire il test in seguit all'apertura della PR.
+# Viene eseguito in automatico ad ogni PR oppure può essere lanciato manualmente da GitHub.
+# In questo modo, prima di aggiornare il branch principale viene verificato che non ci siano modifiche breaking.
+
+name: Pull Request Test Workflow
+
+on:
+  pull_request:
+    branches:
+      - development
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Validate build with tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Configure Java environment
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Run Maven tests
+        working-directory: ./gwt-notabene-maven
+        run: mvn clean verify

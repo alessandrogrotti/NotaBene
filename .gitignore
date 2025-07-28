@@ -1,6 +1,6 @@
 db
-**/target
 **/.settings
 **/.classpath
 **/.project
 **/.vscode
+gwt-notabene-maven/**/target/

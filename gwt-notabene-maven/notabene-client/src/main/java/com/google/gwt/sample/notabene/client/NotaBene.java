@@ -10,10 +10,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.sample.notabene.shared.User;
 import com.google.gwt.sample.notabene.shared.UserService;
 import com.google.gwt.sample.notabene.shared.UserServiceAsync;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-
+import com.google.gwt.sample.notabene.shared.Tag;
+import com.google.gwt.sample.notabene.shared.TagService;
+import com.google.gwt.sample.notabene.shared.TagServiceAsync;
+ 
 public class NotaBene implements EntryPoint {
 
     
@@ -22,16 +22,18 @@ public class NotaBene implements EntryPoint {
     private HomePage homePage;
     private RegistrationForm registrationForm;
     private LoginForm loginForm;
-
+    private TagManagementPage tagManagementPage;
+    private final TagServiceAsync tagService = GWT.create(TagService.class);
  
-    
-//ENTRY POINT HOME PAGE BASIC
+    //ENTRY POINT HOME PAGE BASIC
    public void onModuleLoad() {
         homePage = new HomePage();
         registrationForm = new RegistrationForm();
         loginForm = new LoginForm();
+        tagManagementPage = new TagManagementPage();
         setupEventHandlers();
         showHomePage();
+        
     }
 
       private void showRegistrationForm() {
@@ -48,6 +50,12 @@ public class NotaBene implements EntryPoint {
         String name = isAuthenticated ? currentUser.getName() : "";
         String surname = isAuthenticated ? currentUser.getSurname() : "";
         homePage.show(isAuthenticated, name, surname);
+    }
+
+    private void showTagManagementPage() {
+        if (currentUser != null) {
+            tagManagementPage.show();
+        }
     }
     
 //Gestore registrazione
@@ -179,5 +187,18 @@ public class NotaBene implements EntryPoint {
             }
         });
         
+        homePage.getManageTagsButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showTagManagementPage();
+            }
+        });
+        
+        tagManagementPage.getBackButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showHomePage();
+            }
+        });
     }
 }

@@ -21,4 +21,15 @@
     <url-pattern>/app/userService</url-pattern>
   </servlet-mapping>
 
+    <!-- Tag Service Servlet -->
+  <servlet>
+    <servlet-name>tagService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.TagServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>tagService</servlet-name>
+    <url-pattern>/app/tagService</url-pattern>
+  </servlet-mapping>
+
 </web-app>

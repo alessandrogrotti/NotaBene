@@ -52,8 +52,7 @@ public class HomePage {
         Label notesTitle = new Label("Elenco note di " + name + " " + surname);
         notesTitle.setStyleName("notes-title");
         notesPanel.add(notesTitle);
-        // Qui puoi aggiungere la logica per recuperare e mostrare le note dell'utente
-        // Esempio statico:
+        //ESEMPIO STATICO
         notesPanel.add(new Label("- Nota 1"));
         notesPanel.add(new Label("- Nota 2"));
         notesPanel.add(addNoteButton);

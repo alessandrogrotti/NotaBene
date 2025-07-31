@@ -10,4 +10,6 @@ public interface UserServiceAsync {
     void isUsernameExists(String username, AsyncCallback<Boolean> callback);
 
     void authenticateUser(String username, String password, AsyncCallback<User> callback);
+    
+    void getAllUsers(AsyncCallback<java.util.List<User>> callback);
 }

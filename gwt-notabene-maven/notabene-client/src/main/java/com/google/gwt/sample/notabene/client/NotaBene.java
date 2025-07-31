@@ -23,6 +23,7 @@ public class NotaBene implements EntryPoint {
     private RegistrationForm registrationForm;
     private LoginForm loginForm;
     private TagManagementPage tagManagementPage;
+    private CreateNoteForm createNoteForm;
     private final TagServiceAsync tagService = GWT.create(TagService.class);
  
     //ENTRY POINT HOME PAGE BASIC
@@ -31,6 +32,7 @@ public class NotaBene implements EntryPoint {
         registrationForm = new RegistrationForm();
         loginForm = new LoginForm();
         tagManagementPage = new TagManagementPage();
+        createNoteForm = new CreateNoteForm();
         setupEventHandlers();
         showHomePage();
         
@@ -47,14 +49,18 @@ public class NotaBene implements EntryPoint {
   
      private void showHomePage() {
         boolean isAuthenticated = currentUser != null;
-        String name = isAuthenticated ? currentUser.getName() : "";
-        String surname = isAuthenticated ? currentUser.getSurname() : "";
-        homePage.show(isAuthenticated, name, surname);
+        homePage.show(isAuthenticated, currentUser);
     }
 
     private void showTagManagementPage() {
         if (currentUser != null) {
             tagManagementPage.show();
+        }
+    }
+    
+    private void showCreateNoteForm() {
+        if (currentUser != null) {
+            createNoteForm.show();
         }
     }
     
@@ -194,9 +200,42 @@ public class NotaBene implements EntryPoint {
             }
         });
         
+        homePage.getAddNoteButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showCreateNoteForm();
+            }
+        });
+        
+        homePage.getLogoutButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                currentUser = null;
+                Window.alert("Logout effettuato con successo!");
+                showHomePage();
+            }
+        });
+        
         tagManagementPage.getBackButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
+                showHomePage();
+            }
+        });
+        
+        createNoteForm.getCancelButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                createNoteForm.clearForm();
+                showHomePage();
+            }
+        });
+        
+        createNoteForm.getCreateButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                // TODO: Implementare la logica di creazione nota
+                Window.alert("Funzionalità di creazione nota da implementare");
                 showHomePage();
             }
         });

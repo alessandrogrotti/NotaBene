@@ -5,6 +5,8 @@ import com.google.gwt.sample.notabene.shared.UserService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.password4j.Hash;
 import com.password4j.Password;
+import java.util.ArrayList;
+import java.util.List;
 
 // Implementazione del servizio UserService
 public class UserServiceImpl extends RemoteServiceServlet implements UserService {
@@ -138,6 +140,28 @@ public class UserServiceImpl extends RemoteServiceServlet implements UserService
         } catch (Exception e) {
             System.err.println("Errore nel controllo dell'username: " + e.getMessage());
             return false;
+        }
+    }
+    
+    @Override
+    public List<User> getAllUsers() {
+        try {
+            List<User> users = userRepository.getAllUsers();
+            // Rimuove le password per sicurezza
+            List<User> safeUsers = new ArrayList<>();
+            for (User user : users) {
+                User safeUser = new User(
+                    user.getUsername(),
+                    null, // Non inviamo la password al client
+                    user.getName(),
+                    user.getSurname()
+                );
+                safeUsers.add(safeUser);
+            }
+            return safeUsers;
+        } catch (Exception e) {
+            System.err.println("Errore nel recupero degli utenti: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 }

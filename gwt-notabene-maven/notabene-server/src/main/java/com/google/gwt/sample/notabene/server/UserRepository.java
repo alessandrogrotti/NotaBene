@@ -4,7 +4,8 @@ import com.google.gwt.sample.notabene.shared.User;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 // Repository per gestire la persistenza degli utenti con MapDB
@@ -91,6 +92,15 @@ public class UserRepository {
         } catch (Exception e) {
             System.err.println("Errore nel controllo esistenza utente: " + e.getMessage());
             return false;
+        }
+    }
+    
+    public List<User> getAllUsers() {
+        try {
+            return new ArrayList<>(usersMap.values());
+        } catch (Exception e) {
+            System.err.println("Errore nel recupero di tutti gli utenti: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 

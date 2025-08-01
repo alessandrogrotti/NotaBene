@@ -14,7 +14,7 @@ public class NoteServiceImplTest {
     private NoteServiceImpl service;
     private NoteRepository repo;
 
-    /* 
+    
     @BeforeEach
     void setUp() {
         repo = NoteRepository.getInstance();
@@ -25,10 +25,10 @@ public class NoteServiceImplTest {
 
     @Test
     void testCreateNoteSuccess() {
-        Note note = new Note("Test Title", "Test Content", "testuser");
+        Note note = new Note("Test titolo", "Testo di prova", "testuser");
         note.setPermission(NotePermission.PRIVATE);
-        note.addTag("test");
-        note.addTag("junit");
+        note.addTag("prova1");
+        note.addTag("prova2");
         
         assertTrue(service.createNote(note));
         
@@ -36,28 +36,28 @@ public class NoteServiceImplTest {
         assertEquals(1, userNotes.size());
         
         Note savedNote = userNotes.get(0);
-        assertEquals("Test Title", savedNote.getTitle());
-        assertEquals("Test Content", savedNote.getContent());
+        assertEquals("Test titolo", savedNote.getTitle());
+        assertEquals("Testo di prova", savedNote.getContent());
         assertEquals("testuser", savedNote.getOwnerUsername());
         assertEquals(NotePermission.PRIVATE, savedNote.getPermission());
-        assertTrue(savedNote.getTags().contains("test"));
-        assertTrue(savedNote.getTags().contains("junit"));
+        assertTrue(savedNote.getTags().contains("prova1"));
+        assertTrue(savedNote.getTags().contains("prova2"));
     }
 
     @Test
     void testCreateNoteWithPermissions() {
-        Note note = new Note("Shared Note", "Content", "owner");
+        Note note = new Note("Nota condivisa", "testo", "owner");
         note.setPermission(NotePermission.READ_WRITE);
-        note.getReadOnlyUsers().add("reader1");
-        note.getWriteUsers().add("writer1");
+        note.getReadOnlyUsers().add("lettore1");
+        note.getWriteUsers().add("scrittore1");
         
         assertTrue(service.createNote(note));
         
         Note savedNote = service.getNoteById(note.getId(), "owner");
         assertNotNull(savedNote);
         assertEquals(NotePermission.READ_WRITE, savedNote.getPermission());
-        assertTrue(savedNote.getReadOnlyUsers().contains("reader1"));
-        assertTrue(savedNote.getWriteUsers().contains("writer1"));
+        assertTrue(savedNote.getReadOnlyUsers().contains("lettore1"));
+        assertTrue(savedNote.getWriteUsers().contains("scrittore1"));
     }
 
     @Test
@@ -67,37 +67,37 @@ public class NoteServiceImplTest {
 
     @Test
     void testCreateNoteEmptyTitle() {
-        Note note = new Note("", "Content", "user");
+        Note note = new Note("", "testo di prova", "user");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
     @Test
     void testCreateNoteEmptyContent() {
-        Note note = new Note("Title", "", "user");
+        Note note = new Note("Titolo", "", "user");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
     @Test
     void testCreateNoteTitleTooLong() {
         String longTitle = "A".repeat(101);
-        Note note = new Note(longTitle, "Content", "user");
+        Note note = new Note(longTitle, "Contenuto di prova", "user");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
     @Test
     void testCreateNoteContentTooLong() {
-        String longContent = "A".repeat(5001);
-        Note note = new Note("Title", longContent, "user");
+        String longContent = "A".repeat(281);
+        Note note = new Note("Titolo", longContent, "user");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
     @Test
     void testGetUserNotes() {
         // Crea note per diversi utenti
-        service.createNote(new Note("Note 1", "Content 1", "user1"));
-        service.createNote(new Note("Note 2", "Content 2", "user1"));
-        service.createNote(new Note("Note 3", "Content 3", "user2"));
-        
+        service.createNote(new Note("Nota 1", "Contenuto 1", "user1"));
+        service.createNote(new Note("Nota 2", "Contenuto 2", "user1"));
+        service.createNote(new Note("Nota 3", "Contenuto 3", "user2"));
+
         List<Note> user1Notes = service.getUserNotes("user1");
         List<Note> user2Notes = service.getUserNotes("user2");
         
@@ -107,24 +107,21 @@ public class NoteServiceImplTest {
 
     @Test
     void testNotePermissions() {
-        Note privateNote = new Note("Private", "Content", "owner");
+        Note privateNote = new Note("Nota Privata", "Contenuto", "owner");
         privateNote.setPermission(NotePermission.PRIVATE);
         service.createNote(privateNote);
         
-        Note readOnlyNote = new Note("ReadOnly", "Content", "owner");
+        Note readOnlyNote = new Note("Nota Sola Lettura", "Contenuto", "owner");
         readOnlyNote.setPermission(NotePermission.READ_ONLY);
-        readOnlyNote.getReadOnlyUsers().add("reader");
+        readOnlyNote.getReadOnlyUsers().add("lettore");
         service.createNote(readOnlyNote);
         
-        // Owner può sempre leggere
         assertNotNull(service.getNoteById(privateNote.getId(), "owner"));
         assertNotNull(service.getNoteById(readOnlyNote.getId(), "owner"));
         
-        // Altri utenti non possono leggere note private
-        assertNull(service.getNoteById(privateNote.getId(), "other"));
+        assertNull(service.getNoteById(privateNote.getId(), "owner2"));
         
-        // Reader può leggere note read-only
-        assertNotNull(service.getNoteById(readOnlyNote.getId(), "reader"));
+        assertNotNull(service.getNoteById(readOnlyNote.getId(), "lettore"));
     }
-        */
+        
 }

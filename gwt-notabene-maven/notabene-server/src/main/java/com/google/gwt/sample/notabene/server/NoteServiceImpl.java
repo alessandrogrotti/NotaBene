@@ -1,5 +1,7 @@
 package com.google.gwt.sample.notabene.server;
 
+import java.util.List;
+
 import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -63,6 +65,101 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
             System.err.println("Errore durante la creazione della nota: " + e.getMessage());
             e.printStackTrace();
             throw new IllegalArgumentException("Errore durante la creazione della nota: " + e.getMessage());
+        }
+    }
+
+     @Override
+    public List<Note> getUserNotes(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return List.of(); 
+        }
+        
+        try {
+            return noteRepository.getUserNotes(username);
+        } catch (Exception e) {
+            System.err.println("Errore durante il recupero delle note dell'utente: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+    
+    @Override
+    public List<Note> getAccessibleNotes(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return List.of(); 
+        }
+        
+        try {
+            return noteRepository.getAccessibleNotes(username);
+        } catch (Exception e) {
+            System.err.println("Errore durante il recupero delle note accessibili all'utente: " + e.getMessage());
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+    
+    @Override
+    public Note getNoteById(String noteId, String username) {
+        if (noteId == null || noteId.trim().isEmpty() || 
+            username == null || username.trim().isEmpty()) {
+            return null;
+        }
+        
+        try {
+            Note note = noteRepository.getNote(noteId);
+            
+            if (note != null && note.canRead(username)) {
+                return note;
+            }
+            
+            return null;
+        } catch (Exception e) {
+            System.err.println("Errore durante il recupero della nota: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    @Override
+    public boolean updateNote(Note note, String username) {
+        if (note == null || username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        
+        try {
+            Note existingNote = noteRepository.getNote(note.getId());
+            
+            if (existingNote == null || !existingNote.canWrite(username)) {
+                return false;
+            }
+
+            return noteRepository.saveNote(note);
+        } catch (Exception e) {
+            System.err.println("Errore durante l'aggiornamento della nota: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    @Override
+    public boolean deleteNote(String noteId, String username) {
+        if (noteId == null || noteId.trim().isEmpty() || 
+            username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        
+        try {
+            Note note = noteRepository.getNote(noteId);
+            
+            if (note == null || !note.getOwnerUsername().equals(username)) {
+                return false;
+            }
+            
+            return noteRepository.deleteNote(noteId);
+        } catch (Exception e) {
+            System.err.println("Errore durante l'eliminazione della nota: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
     }
     

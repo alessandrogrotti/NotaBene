@@ -113,4 +113,44 @@ public class NoteRepository {
             noteDB.rollback();
         }
     }
+
+        public List<Note> getUserNotes(String username) {
+        try {
+            return notesMap.values().stream()
+                    .filter(note -> note.getOwnerUsername().equals(username))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Errore nel recuperare le note dell'utente: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Note> getAccessibleNotes(String username) {
+        try {
+            return notesMap.values().stream()
+                    .filter(note -> note.canRead(username))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Errore nel recuperare le note accessibili all'utente: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    
+        public boolean deleteNote(String noteId) {
+        try {
+            Note removed = notesMap.remove(noteId);
+            if (removed != null) {
+                noteDB.commit();
+                System.out.println("Nota eliminata con successo: " + noteId);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("Errore nell'eliminare la nota: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

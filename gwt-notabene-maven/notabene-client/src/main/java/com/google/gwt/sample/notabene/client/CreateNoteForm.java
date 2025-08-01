@@ -244,6 +244,7 @@ public class CreateNoteForm {
         availableUsersFlow.clear();
         
         for (User user : availableUsers) {
+    
             if (!selectedReadUsers.contains(user.getUsername()) && 
                 !selectedWriteUsers.contains(user.getUsername())) {
                 
@@ -252,22 +253,28 @@ public class CreateNoteForm {
                 
                 Label userLabel = new Label(user.getName() + " " + user.getSurname() + " (" + user.getUsername() + ")");
                 userLabel.setStyleName("user-label");
-                
-                Button readButton = new Button("Lettura");
+
+                Button readButton = new Button("Concedi lettura");
                 readButton.setStyleName("user-read-button");
                 readButton.addClickHandler(event -> {
                     selectUserForRead(user.getUsername());
                 });
                 
-                Button writeButton = new Button("Scrittura");
+                Button writeButton = new Button("Concedi lettura e scrittura");
                 writeButton.setStyleName("user-write-button");
                 writeButton.addClickHandler(event -> {
                     selectUserForWrite(user.getUsername());
                 });
                 
                 userPanel.add(userLabel);
-                userPanel.add(readButton);
-                userPanel.add(writeButton);
+                
+                String selectedPermission = permissionBox.getSelectedValue();
+                if (NotePermission.READ_ONLY.name().equals(selectedPermission)) {
+                    userPanel.add(readButton);
+                } else if (NotePermission.READ_WRITE.name().equals(selectedPermission)) {
+                    userPanel.add(writeButton);
+                }
+
                 availableUsersFlow.add(userPanel);
             }
         }
@@ -341,6 +348,9 @@ public class CreateNoteForm {
         boolean showWriteSection = NotePermission.READ_WRITE.name().equals(selectedPermission);
         writeUsersLabel.setVisible(showWriteSection);
         selectedWriteUsersFlow.setVisible(showWriteSection);
+        
+        // Aggiorna la visualizzazione degli utenti per mostrare i pulsanti corretti
+        updateUsersDisplay();
     }
 
     public void show() {

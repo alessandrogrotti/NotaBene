@@ -139,3 +139,109 @@ body {
 .back-button:hover {
   background-color: #5a6268;
 }
+
+.note-item {
+  background-color: #ffffff;
+  border: 2px solid #dee2e6;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.note-item:hover {
+  background-color: #e3f2fd;
+  border-color: #2062BB;
+  box-shadow: 0 8px 15px rgba(32, 98, 187, 0.2);
+  transform: translateY(-3px);
+}
+
+.clickable-item {
+  cursor: pointer !important;
+}
+
+.note-item-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2062BB;
+  margin-bottom: 12px;
+  text-decoration: none;
+}
+
+.note-item-preview {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 12px;
+  line-height: 1.5;
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.note-item-author {
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #eee;
+}
+
+.note-item-tag {
+  background-color: #2062BB;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-right: 8px;
+  margin-bottom: 5px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.note-item-tags-prefix {
+  font-size: 13px;
+  color: #666;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* Stili per la pagina di dettaglio nota */
+.note-detail-content {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 10px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.note-detail-tags {
+  margin: 10px 0;
+}
+
+.note-tag-label {
+  background-color: #2062BB;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  margin-right: 8px;
+  margin-bottom: 5px;
+  display: inline-block;
+}
+
+.note-no-tags {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+}

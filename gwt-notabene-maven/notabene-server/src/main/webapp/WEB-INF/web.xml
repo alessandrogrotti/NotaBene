@@ -32,4 +32,15 @@
     <url-pattern>/app/tagService</url-pattern>
   </servlet-mapping>
 
+  <!-- Note Service Servlet -->
+  <servlet>
+    <servlet-name>noteService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.NoteServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>noteService</servlet-name>
+    <url-pattern>/app/noteService</url-pattern>
+  </servlet-mapping>
+
 </web-app>

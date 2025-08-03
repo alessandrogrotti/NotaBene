@@ -3,6 +3,7 @@ package com.google.gwt.sample.notabene.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.sample.notabene.shared.User;
 import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
@@ -62,13 +63,154 @@ public class HomePage {
             panel.add(addNoteButton);
             panel.add(manageTagsButton);
             panel.add(logoutButton);
+
+            loadUserNotes(user.getUsername());
+
+
             panel.add(notesPanel);
             RootPanel.get("list").add(panel);
             
-           // showNotesList(user.getName(), user.getSurname(), user.getUsername());
         }
     }
 
+    private void loadUserNotes(String username) {
+        notesPanel.clear();
+        notesPanel.add(new Label("Caricamento note..."));
+        //caroca note user
+        noteService.getUserNotes(username, new AsyncCallback<List<Note>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                notesPanel.clear();
+                notesPanel.add(new Label("Errore nel caricamento delle note: " + caught.getMessage()));
+            }
+            
+            @Override
+            public void onSuccess(List<Note> userNotes) {
+                // carica note accessibili
+                noteService.getAccessibleNotes(username, new AsyncCallback<List<Note>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert("Errore nel caricamento delle note accessibili: " + caught.getMessage());
+                                   }
+                    
+                    @Override
+                    public void onSuccess(List<Note> accessibleNotes) {
+                        // combina le due liste evitando duplicati
+                        for (Note accessibleNote : accessibleNotes) {
+                            boolean alreadyExists = false;
+                            for (Note userNote : userNotes) {
+                                if (userNote.getId().equals(accessibleNote.getId())) {
+                                    alreadyExists = true;
+                                    break;
+                                }
+                            }
+                            if (!alreadyExists) {
+                                userNotes.add(accessibleNote);
+                            }
+                        }
+                        displayNotes(userNotes);
+                    }
+                });
+            }
+        });
+    }
+    
+    private void displayNotes(List<Note> notes) {
+        notesPanel.clear();
+        
+        if (notes == null || notes.isEmpty()) {
+            Label noNotesLabel = new Label("Nessuna nota disponibile.");
+            noNotesLabel.setStyleName("form-label");
+            notesPanel.add(noNotesLabel);
+            return;
+        }
+        
+        Label notesTitle = new Label("Le tue note (" + notes.size() + "):");
+        notesTitle.setStyleName("form-title");
+        notesPanel.add(notesTitle);
+        
+        // Container per le note con un po' di spazio
+        VerticalPanel notesContainer = new VerticalPanel();
+        notesContainer.setSpacing(10);
+        notesContainer.setWidth("100%");
+        
+        for (Note note : notes) {
+            createNoteItem(note, notesContainer);
+        }
+        
+        notesPanel.add(notesContainer);
+    }
+    
+    private void createNoteItem(Note note, VerticalPanel container) {
+        VerticalPanel noteItem = new VerticalPanel();
+        noteItem.setStyleName("note-item");
+        noteItem.addStyleName("clickable-item");
+        noteItem.setWidth("80%");
+        noteItem.setSpacing(8);
+        
+        // Titolo della nota (cliccabile)
+        Label titleLabel = new Label(note.getTitle());
+        titleLabel.setStyleName("note-item-title");
+        
+        // anteprima del contenuto
+        String preview = note.getContent();
+        if (preview != null) {
+            if (preview.length() > 150) {
+                preview = preview.substring(0, 150) + "...";
+            }
+        } else {
+            preview = "Nessun contenuto";
+        }
+        Label previewLabel = new Label(preview);
+        previewLabel.setStyleName("note-item-preview");
+        
+        // Info autore e data
+        String authorInfo = "Autore: " + note.getOwnerUsername();
+        if (note.getCreatedAt() != null) {
+            authorInfo += " • " + com.google.gwt.i18n.client.DateTimeFormat.getFormat("dd/MM/yyyy HH:mm").format(note.getCreatedAt());
+        }
+        Label authorLabel = new Label(authorInfo);
+        authorLabel.setStyleName("note-item-author");
+        
+        noteItem.add(titleLabel);
+        noteItem.add(previewLabel);
+        noteItem.add(authorLabel);
+        
+        // Tags se presenti
+        if (note.getTags() != null && !note.getTags().isEmpty()) {
+            HorizontalPanel tagsPanel = new HorizontalPanel();
+            tagsPanel.setSpacing(5);
+            Label tagsPrefix = new Label("Tag: ");
+            tagsPrefix.setStyleName("note-item-tags-prefix");
+            tagsPanel.add(tagsPrefix);
+            
+            for (String tag : note.getTags()) {
+                Label tagLabel = new Label(tag);
+                tagLabel.setStyleName("note-item-tag");
+                tagsPanel.add(tagLabel);
+            }
+            noteItem.add(tagsPanel);
+        }
+        
+        // Aggiungi handler per il click
+        noteItem.addDomHandler(event -> {
+            if (onNoteClickHandler != null) {
+                onNoteClickHandler.onNoteClick(note);
+            }
+        }, com.google.gwt.event.dom.client.ClickEvent.getType());
+        
+        container.add(noteItem);
+    }
+    
+    public interface NoteClickHandler {
+        void onNoteClick(Note note);
+    }
+    
+    private NoteClickHandler onNoteClickHandler;
+    
+    public void setNoteClickHandler(NoteClickHandler handler) {
+        this.onNoteClickHandler = handler;
+    }
 
     public Button getRegisterButton() { return registerButton; }
     public Button getLoginButton() { return loginButton; }

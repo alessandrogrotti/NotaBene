@@ -28,6 +28,7 @@ public class NotaBene implements EntryPoint {
     private LoginForm loginForm;
     private TagManagementPage tagManagementPage;
     private CreateNoteForm createNoteForm;
+    private NoteDetailPage noteDetailPage;
     private final TagServiceAsync tagService = GWT.create(TagService.class);
  
     //ENTRY POINT HOME PAGE BASIC
@@ -37,6 +38,7 @@ public class NotaBene implements EntryPoint {
         loginForm = new LoginForm();
         tagManagementPage = new TagManagementPage();
         createNoteForm = new CreateNoteForm();
+        noteDetailPage = new NoteDetailPage();
         setupEventHandlers();
         showHomePage();
         
@@ -67,9 +69,16 @@ public class NotaBene implements EntryPoint {
             createNoteForm.show();
         }
     }
+
+    private void showNoteDetail(Note note) {
+    if (currentUser != null && note != null) {
+        noteDetailPage.showNote(note);
+        noteDetailPage.show();
+        }
+    }
     
-//Gestore registrazione
-  private void handleRegistration() {
+    //Gestore registrazione
+    private void handleRegistration() {
         String username = registrationForm.getUsernameBox().getText().trim();
         String password = registrationForm.getPasswordBox().getText();
         String name = registrationForm.getNameBox().getText().trim();
@@ -306,6 +315,20 @@ public class NotaBene implements EntryPoint {
             @Override
             public void onClick(ClickEvent event) {
                handleCreateNote();
+            }
+        });
+
+         noteDetailPage.getBackButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showHomePage();
+            }
+        });
+        
+        homePage.setNoteClickHandler(new HomePage.NoteClickHandler() {
+            @Override
+            public void onNoteClick(Note note) {
+                showNoteDetail(note);
             }
         });
     }

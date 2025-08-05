@@ -123,5 +123,80 @@ public class NoteServiceImplTest {
         
         assertNotNull(service.getNoteById(readOnlyNote.getId(), "lettore"));
     }
+    @Test
+    void testDeleteNoteSuccess() {
+        Note note = new Note("Nota da eliminare", "Contenuto di prova", "testuser");
+        service.createNote(note);
+        String noteId = note.getId();
+        
+        // verifica esistenza nota di prova
+        assertNotNull(service.getNoteById(noteId, "testuser"));
+        assertEquals(1, service.getUserNotes("testuser").size());
+        boolean result = service.deleteNote(noteId, "testuser");
+        assertTrue(result);
+        assertNull(service.getNoteById(noteId, "testuser"));
+        assertEquals(0, service.getUserNotes("testuser").size());
+    }
+
+  
+    @Test
+    void testDeleteMultipleNotes() {
+        Note note1 = new Note("Nota 1", "Contenuto 1", "testuser");
+        note1.setId("note1");
+        Note note2 = new Note("Nota 2", "Contenuto 2", "testuser");
+        note2.setId("note2");   
+        Note note3 = new Note("Nota 3", "Contenuto 3", "altrouser");
+        note3.setId("note3");
+
+        service.createNote(note1);
+        service.createNote(note2);
+        service.createNote(note3);
+        
+        assertEquals(2, service.getUserNotes("testuser").size());
+        assertEquals(1, service.getUserNotes("altrouser").size());
+
+        boolean result = service.deleteNote(note1.getId(), "testuser");
+        
+        // solo la nota1 deve essere eliminata
+        assertTrue(result);
+        assertEquals(1, service.getUserNotes("testuser").size());
+        assertEquals(1, service.getUserNotes("altrouser").size());
+        
+        // verifichiamo che rimanga solo note2 per testuser
+        List<Note> remainingNotes = service.getUserNotes("testuser");
+        assertEquals("Nota 2", remainingNotes.get(0).getTitle());
+        
+        // verifichiamo che note3 di altrouser sia ancora presente
+        assertNotNull(service.getNoteById(note3.getId(), "altrouser"));
+    }
+
+
+    @Test
+    void testDeleteNoteUpdatesAccessibleNotes() {
+        Note privateNote = new Note("Nota privata", "Contenuto privato", "user1");
+        privateNote.setPermission(NotePermission.PRIVATE);
+        privateNote.setId("private_note_1");
+        
+        Note sharedNote = new Note("Nota condivisa", "Contenuto condiviso", "user1");
+        sharedNote.setPermission(NotePermission.READ_ONLY);
+        sharedNote.getReadOnlyUsers().add("user2");
+        sharedNote.setId("shared_note_1");
+        
+        service.createNote(privateNote);
+        service.createNote(sharedNote);
+        //stato iniziale
+        assertEquals(2, service.getUserNotes("user1").size());
+        assertEquals(0, service.getUserNotes("user2").size());
+        assertEquals(1, service.getAccessibleNotes("user2").size());
+        
+        //eliminiamo nota condivisa
+        boolean result = service.deleteNote(sharedNote.getId(), "user1");
+        
+        // verifichiamo che l'eliminazione influenzi correttamente le note accessibili
+        assertTrue(result);
+        assertEquals(1, service.getUserNotes("user1").size());
+        assertEquals(0, service.getUserNotes("user2").size());
+        assertEquals(0, service.getAccessibleNotes("user2").size());
+    }
         
 }

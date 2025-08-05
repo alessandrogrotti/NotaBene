@@ -2,6 +2,7 @@ package com.google.gwt.sample.notabene.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.sample.notabene.shared.User;
@@ -54,11 +55,9 @@ public class HomePage {
             panel.add(loginButton);
             RootPanel.get("list").add(panel);
         } else {
+            currentUsername = user.getUsername();
             welcomeLabel.setText("Benvenuto " + user.getName() + " " + user.getSurname() + "!");
             panel.add(welcomeLabel);
-            
-            notesPanel.clear();
-            notesPanel.add(new Label("Qui ci saranno le note di: " + user.getName() + " " + user.getSurname() + "!"));
 
             panel.add(addNoteButton);
             panel.add(manageTagsButton);
@@ -66,10 +65,8 @@ public class HomePage {
 
             loadUserNotes(user.getUsername());
 
-
             panel.add(notesPanel);
             RootPanel.get("list").add(panel);
-            
         }
     }
 
@@ -192,8 +189,33 @@ public class HomePage {
             noteItem.add(tagsPanel);
         }
         
-        // Aggiungi handler per il click
-        noteItem.addDomHandler(event -> {
+        // pannello per i pulsanti (solo se l'utente è il proprietario)
+        if (currentUsername != null && currentUsername.equals(note.getOwnerUsername())) {
+            HorizontalPanel buttonPanel = new HorizontalPanel();
+            buttonPanel.setSpacing(10);
+            buttonPanel.setStyleName("note-item-buttons");
+            
+            Button deleteButton = new Button("Elimina");
+            deleteButton.setStyleName("delete-button");
+            deleteButton.addClickHandler(event -> {
+                event.stopPropagation(); // per mantere click solo sul pulsante
+                if (onDeleteNoteHandler != null) {
+                    onDeleteNoteHandler.onDeleteNote(note);
+                }
+            });
+            
+            buttonPanel.add(deleteButton);
+            noteItem.add(buttonPanel);
+        }
+        
+        // handler per click su parte principale della nota
+        titleLabel.addDomHandler(event -> {
+            if (onNoteClickHandler != null) {
+                onNoteClickHandler.onNoteClick(note);
+            }
+        }, com.google.gwt.event.dom.client.ClickEvent.getType());
+        
+        previewLabel.addDomHandler(event -> {
             if (onNoteClickHandler != null) {
                 onNoteClickHandler.onNoteClick(note);
             }
@@ -202,14 +224,25 @@ public class HomePage {
         container.add(noteItem);
     }
     
+    // interface per gestire i click sulle note
     public interface NoteClickHandler {
         void onNoteClick(Note note);
     }
+
+    // interface per gestire l'eliminazione delle note
+    public interface DeleteNoteHandler {
+        void onDeleteNote(Note note);
+    }
     
     private NoteClickHandler onNoteClickHandler;
+    private DeleteNoteHandler onDeleteNoteHandler;
     
     public void setNoteClickHandler(NoteClickHandler handler) {
         this.onNoteClickHandler = handler;
+    }
+    
+    public void setDeleteNoteHandler(DeleteNoteHandler handler) {
+        this.onDeleteNoteHandler = handler;
     }
 
     public Button getRegisterButton() { return registerButton; }

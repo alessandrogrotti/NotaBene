@@ -14,6 +14,10 @@ public class NoteDetailPage {
     private HTML contentArea = new HTML();
     private FlowPanel tagsPanel = new FlowPanel();
     private Button backButton = new Button("Torna alla Lista");
+    private Button deleteButton = new Button("Elimina Nota");
+    private HorizontalPanel buttonPanel = new HorizontalPanel();
+    
+    private Note currentNote; // Per tenere traccia della nota corrente
     
     private static final DateTimeFormat dateFormat = DateTimeFormat.getFormat("dd/MM/yyyy HH:mm");
     
@@ -26,7 +30,7 @@ public class NoteDetailPage {
         panel.setSpacing(20);
         panel.setWidth("90%");
         
-        // Applica stili coerenti con le altre pagine
+       
         titleLabel.setStyleName("form-title");
         authorLabel.setStyleName("form-label");
         createdDateLabel.setStyleName("form-label");
@@ -34,21 +38,26 @@ public class NoteDetailPage {
         contentArea.setStyleName("note-detail-content");
         tagsPanel.setStyleName("note-detail-tags");
         backButton.setStyleName("back-button");
+        deleteButton.setStyleName("delete-button");
         
-        // Struttura della pagina
-        panel.add(backButton); // Pulsante in alto per facilità di navigazione
+        buttonPanel.setSpacing(10);
+        buttonPanel.add(backButton);
+        buttonPanel.add(deleteButton);
+        
+        
+        panel.add(buttonPanel); // Pulsanti in alto per facilità di navigazione
         panel.add(titleLabel);
         panel.add(authorLabel);
         panel.add(createdDateLabel);
         panel.add(lastModifiedLabel);
         
-        // Sezione contenuto
+        // sezione contenuto
         Label contentLabel = new Label("Contenuto:");
         contentLabel.setStyleName("form-label");
         panel.add(contentLabel);
         panel.add(contentArea);
         
-        // Sezione tag
+        // sezione tag
         Label tagsLabel = new Label("Tag:");
         tagsLabel.setStyleName("form-label");
         panel.add(tagsLabel);
@@ -56,6 +65,8 @@ public class NoteDetailPage {
     }
     
     public void showNote(Note note) {
+        this.currentNote = note; 
+        
         if (note == null) {
             titleLabel.setText("Nota non trovata");
             authorLabel.setText("");
@@ -63,6 +74,7 @@ public class NoteDetailPage {
             lastModifiedLabel.setText("");
             contentArea.setHTML("");
             tagsPanel.clear();
+            deleteButton.setVisible(false);
             return;
         }
         
@@ -110,7 +122,24 @@ public class NoteDetailPage {
         RootPanel.get("list").add(panel);
     }
     
+    public void setDeleteButtonVisible(boolean visible, String currentUsername) {
+        if (currentNote != null && currentUsername != null) {
+            boolean isOwner = currentUsername.equals(currentNote.getOwnerUsername());
+            deleteButton.setVisible(visible && isOwner);
+        } else {
+            deleteButton.setVisible(false);
+        }
+    }
+    
     public Button getBackButton() { 
         return backButton; 
+    }
+    
+    public Button getDeleteButton() {
+        return deleteButton;
+    }
+    
+    public Note getCurrentNote() {
+        return currentNote;
     }
 }

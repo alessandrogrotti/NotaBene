@@ -71,10 +71,42 @@ public class NotaBene implements EntryPoint {
     }
 
     private void showNoteDetail(Note note) {
-    if (currentUser != null && note != null) {
-        noteDetailPage.showNote(note);
-        noteDetailPage.show();
+        if (currentUser != null && note != null) {
+            noteDetailPage.showNote(note);
+            noteDetailPage.setDeleteButtonVisible(true, currentUser.getUsername());
+            noteDetailPage.show();
         }
+    }
+    
+    private void handleDeleteNote(Note note) {
+        if (currentUser == null || note == null) {
+            return;
+        }
+
+        // conferma eliminazione
+        boolean confirm = Window.confirm("Sei sicuro di voler eliminare la nota '" + note.getTitle() + "'?\nQuesta operazione non può essere annullata.");
+        
+        if (!confirm) {
+            return;
+        }
+        
+        // call a servizio per eliminare la nota
+        noteService.deleteNote(note.getId(), currentUser.getUsername(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Errore durante l'eliminazione della nota: " + caught.getMessage());
+            }
+            
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    Window.alert("Nota eliminata con successo!");
+                    showHomePage();
+                } else {
+                    Window.alert("Impossibile eliminare la nota. Verifica di avere i permessi necessari.");
+                }
+            }
+        });
     }
     
     //Gestore registrazione
@@ -318,17 +350,35 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-         noteDetailPage.getBackButton().addClickHandler(new ClickHandler() {
+        // handler per il pulsante "Torna alla Lista" nella pagina di dettaglio
+        noteDetailPage.getBackButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 showHomePage();
             }
         });
-        
+
+        // handler per il pulsante "Elimina" nella pagina di dettaglio
+        noteDetailPage.getDeleteButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                handleDeleteNote(noteDetailPage.getCurrentNote());
+            }
+        });
+
+        // handler per i click sulle note nella homepage
         homePage.setNoteClickHandler(new HomePage.NoteClickHandler() {
             @Override
             public void onNoteClick(Note note) {
                 showNoteDetail(note);
+            }
+        });
+
+        // handler per l'eliminazione delle note dalla homepage
+        homePage.setDeleteNoteHandler(new HomePage.DeleteNoteHandler() {
+            @Override
+            public void onDeleteNote(Note note) {
+                handleDeleteNote(note);
             }
         });
     }

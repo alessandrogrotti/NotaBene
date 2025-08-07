@@ -90,12 +90,15 @@ body {
 }
 
 .form-input {
-  padding: 8px;
+  padding: 12px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  width: 250px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
   margin-bottom: 10px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -267,4 +270,277 @@ body {
   color: #999;
   font-style: italic;
   font-size: 14px;
+}
+
+/* Stili per i form di creazione e modifica nota */
+.form-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.character-count {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  text-align: right;
+  font-style: italic;
+}
+
+.form-sublabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2062BB;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+/* Stili per i tag */
+.tags-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 15px;
+  min-height: 50px;
+  align-items: flex-start;
+}
+
+.tag-button {
+  padding: 6px 14px;
+  background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.tag-button:hover {
+  background-color: #2062BB;
+  color: white;
+  border-color: #2062BB;
+  transform: translateY(-1px);
+}
+
+.selected-tags-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 15px;
+  background-color: #e8f4fd;
+  border-radius: 8px;
+  border: 2px solid #2062BB;
+  margin-bottom: 20px;
+  min-height: 50px;
+  align-items: flex-start;
+}
+
+.selected-tag-panel {
+  display: flex;
+  align-items: center;
+  background-color: #2062BB;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.selected-tag-label {
+  margin-right: 8px;
+}
+
+.remove-tag-button {
+  background-color: transparent;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-tag-button:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+/* Stili per gli utenti */
+.users-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 15px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.user-label {
+  font-size: 14px;
+  color: #495057;
+  font-weight: 500;
+  min-width: 200px;
+  margin-right: 15px;
+}
+
+.user-read-button, .user-write-button {
+  padding: 6px 12px;
+  font-size: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin-left: 10px;
+}
+
+.user-read-button {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.user-read-button:hover {
+  background-color: #138496;
+}
+
+.user-write-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.user-write-button:hover {
+  background-color: #218838;
+}
+
+.selected-users-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 15px;
+  background-color: #e8f5e8;
+  border-radius: 8px;
+  border: 2px solid #28a745;
+  margin-bottom: 15px;
+  min-height: 50px;
+  align-items: flex-start;
+}
+
+.selected-user-panel {
+  display: flex;
+  align-items: center;
+  background-color: #28a745;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.selected-user-label {
+  margin-right: 8px;
+}
+
+.remove-user-button {
+  background-color: transparent;
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-user-button:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+
+/* Stili per contenuti vuoti */
+.tags-flow:empty::before {
+  content: "Nessun tag disponibile";
+  color: #999;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+}
+
+.selected-tags-flow:empty::before {
+  content: "Nessun tag selezionato";
+  color: #666;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+}
+
+.users-flow:empty::before {
+  content: "Nessun utente disponibile";
+  color: #999;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+}
+
+.selected-users-flow:empty::before {
+  content: "Nessun utente selezionato";
+  color: #666;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .form-container {
+    margin: 10px;
+    padding: 20px;
+  }
+  
+  .form-input {
+    max-width: 100%;
+  }
+  
+  .tags-flow, .selected-tags-flow, .users-flow, .selected-users-flow {
+    padding: 10px;
+  }
+  
+  .user-label {
+    min-width: 150px;
+    font-size: 13px;
+  }
 }

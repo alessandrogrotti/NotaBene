@@ -109,7 +109,6 @@ public class NotaBene implements EntryPoint {
         });
     }
     
-    //Gestore registrazione
     private void handleRegistration() {
         String username = registrationForm.getUsernameBox().getText().trim();
         String password = registrationForm.getPasswordBox().getText();
@@ -166,7 +165,7 @@ public class NotaBene implements EntryPoint {
         }
 
         Note note = new Note(title, content, currentUser.getUsername());
-        //imposto i permessi
+        //impostazione dei permessi
         try {
             NotePermission permission = NotePermission.valueOf(permissionValue);
             note.setPermission(permission);

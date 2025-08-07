@@ -92,7 +92,6 @@ public class HomePage {
                     
                     @Override
                     public void onSuccess(List<Note> accessibleNotes) {
-                        // combina le due liste evitando duplicati
                         for (Note accessibleNote : accessibleNotes) {
                             boolean alreadyExists = false;
                             for (Note userNote : userNotes) {
@@ -126,7 +125,7 @@ public class HomePage {
         notesTitle.setStyleName("form-title");
         notesPanel.add(notesTitle);
         
-        // Container per le note con un po' di spazio
+        // Container per le note
         VerticalPanel notesContainer = new VerticalPanel();
         notesContainer.setSpacing(10);
         notesContainer.setWidth("100%");
@@ -173,7 +172,7 @@ public class HomePage {
         noteItem.add(previewLabel);
         noteItem.add(authorLabel);
         
-        // Tags se presenti
+        // Tag se presenti
         if (note.getTags() != null && !note.getTags().isEmpty()) {
             HorizontalPanel tagsPanel = new HorizontalPanel();
             tagsPanel.setSpacing(5);

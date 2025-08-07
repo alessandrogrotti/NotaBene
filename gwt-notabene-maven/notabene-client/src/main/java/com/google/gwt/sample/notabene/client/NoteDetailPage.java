@@ -29,6 +29,7 @@ public class NoteDetailPage {
         panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         panel.setSpacing(20);
         panel.setWidth("90%");
+        panel.setStyleName("form-container"); // Aggiunge il container stilizzato
         
        
         titleLabel.setStyleName("form-title");
@@ -45,7 +46,7 @@ public class NoteDetailPage {
         buttonPanel.add(deleteButton);
         
         
-        panel.add(buttonPanel); // Pulsanti in alto per facilità di navigazione
+        panel.add(buttonPanel);
         panel.add(titleLabel);
         panel.add(authorLabel);
         panel.add(createdDateLabel);
@@ -93,7 +94,7 @@ public class NoteDetailPage {
             lastModifiedLabel.setText("Data ultima modifica non disponibile");
         }
         
-        // mostriamo il contenuto 
+        // mostra il contenuto 
         String content = note.getContent();
         if (content != null) {
             content = content.replace("\n", "<br>");

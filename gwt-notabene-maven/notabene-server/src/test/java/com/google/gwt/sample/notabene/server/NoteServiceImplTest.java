@@ -25,23 +25,23 @@ public class NoteServiceImplTest {
 
     @Test
     void testCreateNoteSuccess() {
-        Note note = new Note("Test titolo", "Testo di prova", "testuser");
+        Note note = new Note("Appunti Java", "Concetti base di programmazione", "mario");
         note.setPermission(NotePermission.PRIVATE);
-        note.addTag("prova1");
-        note.addTag("prova2");
+        note.addTag("java");
+        note.addTag("programmazione");
         
         assertTrue(service.createNote(note));
         
-        List<Note> userNotes = service.getUserNotes("testuser");
+        List<Note> userNotes = service.getUserNotes("mario");
         assertEquals(1, userNotes.size());
         
         Note savedNote = userNotes.get(0);
-        assertEquals("Test titolo", savedNote.getTitle());
-        assertEquals("Testo di prova", savedNote.getContent());
-        assertEquals("testuser", savedNote.getOwnerUsername());
+        assertEquals("Appunti Java", savedNote.getTitle());
+        assertEquals("Concetti base di programmazione", savedNote.getContent());
+        assertEquals("mario", savedNote.getOwnerUsername());
         assertEquals(NotePermission.PRIVATE, savedNote.getPermission());
-        assertTrue(savedNote.getTags().contains("prova1"));
-        assertTrue(savedNote.getTags().contains("prova2"));
+        assertTrue(savedNote.getTags().contains("java"));
+        assertTrue(savedNote.getTags().contains("programmazione"));
     }
 
     @Test
@@ -67,27 +67,27 @@ public class NoteServiceImplTest {
 
     @Test
     void testCreateNoteEmptyTitle() {
-        Note note = new Note("", "testo di prova", "user");
+        Note note = new Note("", "contenuto della nota", "marco");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
     @Test
     void testCreateNoteEmptyContent() {
-        Note note = new Note("Titolo", "", "user");
+        Note note = new Note("Titolo nota", "", "marco");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
     @Test
     void testCreateNoteTitleTooLong() {
         String longTitle = "A".repeat(101);
-        Note note = new Note(longTitle, "Contenuto di prova", "user");
+        Note note = new Note(longTitle, "Contenuto valido", "marco");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
     @Test
     void testCreateNoteContentTooLong() {
         String longContent = "A".repeat(281);
-        Note note = new Note("Titolo", longContent, "user");
+        Note note = new Note("Titolo valido", longContent, "marco");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }
 
@@ -125,51 +125,54 @@ public class NoteServiceImplTest {
     }
     @Test
     void testDeleteNoteSuccess() {
-        Note note = new Note("Nota da eliminare", "Contenuto di prova", "testuser");
+        // Arrange - Crea una nota
+        Note note = new Note("Lista spesa", "Latte, pane, uova", "giulia");
         service.createNote(note);
         String noteId = note.getId();
         
-        // verifica esistenza nota di prova
-        assertNotNull(service.getNoteById(noteId, "testuser"));
-        assertEquals(1, service.getUserNotes("testuser").size());
-        boolean result = service.deleteNote(noteId, "testuser");
+        // Verifica che la nota esista
+        assertNotNull(service.getNoteById(noteId, "giulia"));
+        assertEquals(1, service.getUserNotes("giulia").size());
+        
+        // Act - Elimina la nota
+        boolean result = service.deleteNote(noteId, "giulia");
+        
+        // Assert - Verifica che l'eliminazione sia avvenuta con successo
         assertTrue(result);
-        assertNull(service.getNoteById(noteId, "testuser"));
-        assertEquals(0, service.getUserNotes("testuser").size());
+        assertNull(service.getNoteById(noteId, "giulia"));
+        assertEquals(0, service.getUserNotes("giulia").size());
     }
 
   
     @Test
     void testDeleteMultipleNotes() {
-        Note note1 = new Note("Nota 1", "Contenuto 1", "testuser");
-        note1.setId("note1");
-        Note note2 = new Note("Nota 2", "Contenuto 2", "testuser");
-        note2.setId("note2");   
-        Note note3 = new Note("Nota 3", "Contenuto 3", "altrouser");
-        note3.setId("note3");
-
+        // Arrange - Crea multiple note
+        Note note1 = new Note("Ricette dolci", "Tiramisu e crostata", "anna");
+        Note note2 = new Note("Ricette salate", "Pasta e risotto", "anna");
+        Note note3 = new Note("Appunti lavoro", "Meeting di lunedì", "luca");
+        
         service.createNote(note1);
         service.createNote(note2);
         service.createNote(note3);
         
-        assertEquals(2, service.getUserNotes("testuser").size());
-        assertEquals(1, service.getUserNotes("altrouser").size());
-
-        boolean result = service.deleteNote(note1.getId(), "testuser");
+        assertEquals(2, service.getUserNotes("anna").size());
+        assertEquals(1, service.getUserNotes("luca").size());
         
-        // solo la nota1 deve essere eliminata
+        // Act - Elimina solo una nota di anna
+        boolean result = service.deleteNote(note1.getId(), "anna");
+        
+        // Assert - Solo la nota1 deve essere eliminata
         assertTrue(result);
-        assertEquals(1, service.getUserNotes("testuser").size());
-        assertEquals(1, service.getUserNotes("altrouser").size());
+        assertEquals(1, service.getUserNotes("anna").size());
+        assertEquals(1, service.getUserNotes("luca").size());
         
-        // verifichiamo che rimanga solo note2 per testuser
-        List<Note> remainingNotes = service.getUserNotes("testuser");
-        assertEquals("Nota 2", remainingNotes.get(0).getTitle());
+        // Verifica che rimanga solo note2 per anna
+        List<Note> remainingNotes = service.getUserNotes("anna");
+        assertEquals("Ricette salate", remainingNotes.get(0).getTitle());
         
-        // verifichiamo che note3 di altrouser sia ancora presente
-        assertNotNull(service.getNoteById(note3.getId(), "altrouser"));
+        // Verifica che note3 di luca sia ancora presente
+        assertNotNull(service.getNoteById(note3.getId(), "luca"));
     }
-
 
     @Test
     void testDeleteNoteUpdatesAccessibleNotes() {

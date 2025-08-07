@@ -20,9 +20,9 @@ public class UserServiceImplTest {
 
     @Test
     void testRegisterUserSuccess() {
-        User u = new User("pippo", "pass123", "pippo", "verdi");
+        User u = new User("mario", "pass123", "Mario", "Rossi");
         assertTrue(service.registerUser(u));
-        assertTrue(service.isUsernameExists("pippo"));
+        assertTrue(service.isUsernameExists("mario"));
     }
 
     @Test
@@ -32,9 +32,9 @@ public class UserServiceImplTest {
 
     @Test
     void testRegisterUserExistingUsername() {
-        service.registerUser(new User("pippo", "pass123", "pippo", "verdi"));
+        service.registerUser(new User("mario", "pass123", "Mario", "Rossi"));
         assertThrows(IllegalArgumentException.class,
-                     () -> service.registerUser(new User("pippo", "pass456", "Mario", "Bianchi")));
+                     () -> service.registerUser(new User("mario", "pass456", "Luigi", "Bianchi")));
     }
 
     @Test
@@ -45,25 +45,25 @@ public class UserServiceImplTest {
 
     @Test
     void testAuthenticateUserSuccess() {
-        service.registerUser(new User("pippo", "secret", "pippo", "verdi"));
-        User auth = service.authenticateUser("pippo", "secret");
+        service.registerUser(new User("mario", "secret", "Mario", "Rossi"));
+        User auth = service.authenticateUser("mario", "secret");
         assertNotNull(auth);
-        assertEquals("pippo", auth.getUsername());
+        assertEquals("mario", auth.getUsername());
         assertNull(auth.getPassword());
-        assertEquals("pippo", auth.getName());
-        assertEquals("verdi", auth.getSurname());
+        assertEquals("Mario", auth.getName());
+        assertEquals("Rossi", auth.getSurname());
     }
 
     @Test
     void testAuthenticateUserWrongPassword() {
-        service.registerUser(new User("pippo", "secret", "pippo", "verdi"));
-        assertNull(service.authenticateUser("pippo", "wrong"));
+        service.registerUser(new User("mario", "secret", "Mario", "Rossi"));
+        assertNull(service.authenticateUser("mario", "wrong"));
     }
 
     @Test
     void testAuthenticateUserUnknownOrEmpty() {
-        assertNull(service.authenticateUser("noone", "pass"));
+        assertNull(service.authenticateUser("inesistente", "pass"));
         assertNull(service.authenticateUser(null, "pass"));
-        assertNull(service.authenticateUser("pippo", ""));
+        assertNull(service.authenticateUser("mario", ""));
     }
 }

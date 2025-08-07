@@ -39,7 +39,7 @@ public class Note implements Serializable {
     }
     
     private String generateId() {
-        return ownerUsername + "_" + System.currentTimeMillis();
+        return ownerUsername + "_" + System.currentTimeMillis() + Math.random();
     }
     
     public String getId() { return id; }

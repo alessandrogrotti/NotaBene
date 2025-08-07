@@ -24,8 +24,10 @@ public class CreateNoteForm {
     private Label formTitle = new Label("Crea una nuova nota");
     private Label titleLabel = new Label("Titolo:");
     private TextBox titleBox = new TextBox();
+    private Label titleCountLabel = new Label("0/50 caratteri");
     private Label contentLabel = new Label("Contenuto:");
     private TextArea contentArea = new TextArea();
+    private Label contentCountLabel = new Label("0/280 caratteri");
     
     private Label tagsLabel = new Label("Tag:");
     private VerticalPanel tagsSection = new VerticalPanel();
@@ -58,12 +60,17 @@ public class CreateNoteForm {
     public CreateNoteForm() {
         setupForm();
         loadAvailableData();
+        
+        // Inizializza i conteggi caratteri
+        updateTitleCount();
+        updateContentCount();
     }
 
     private void setupForm() {
         panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         panel.setSpacing(15);
         panel.setWidth("80%");
+        panel.setStyleName("form-container"); // container stilizzato
    
         formTitle.setStyleName("form-title");
         titleLabel.setStyleName("form-label");
@@ -76,10 +83,32 @@ public class CreateNoteForm {
         titleBox.setStyleName("form-input");
         titleBox.setWidth("400px");
         
+        // Controllo in tempo reale per il titolo con limite fisico
+        titleBox.addKeyUpHandler(event -> {
+            String text = titleBox.getText();
+            if (text.length() > 50) {
+                titleBox.setText(text.substring(0, 50));
+            }
+            updateTitleCount();
+        });
+        
+        titleCountLabel.setStyleName("character-count");
+        
         contentArea.setStyleName("form-input");
         contentArea.setSize("400px", "200px");
         contentArea.setCharacterWidth(50);
         contentArea.setVisibleLines(10);
+        
+        // Controllo in tempo reale per il contenuto con limite fisico 
+        contentArea.addKeyUpHandler(event -> {
+            String text = contentArea.getText();
+            if (text.length() > 280) {
+                contentArea.setText(text.substring(0, 280));
+            }
+            updateContentCount();
+        });
+        
+        contentCountLabel.setStyleName("character-count");
         
         permissionBox.setStyleName("form-input");
         permissionBox.setWidth("400px");
@@ -107,8 +136,10 @@ public class CreateNoteForm {
         panel.add(formTitle);
         panel.add(titleLabel);
         panel.add(titleBox);
+        panel.add(titleCountLabel);
         panel.add(contentLabel);
         panel.add(contentArea);
+        panel.add(contentCountLabel);
         panel.add(tagsLabel);
         panel.add(tagsSection);
         panel.add(permissionLabel);
@@ -349,7 +380,7 @@ public class CreateNoteForm {
         writeUsersLabel.setVisible(showWriteSection);
         selectedWriteUsersFlow.setVisible(showWriteSection);
         
-        // Aggiorna la visualizzazione degli utenti per mostrare i pulsanti corretti
+        // Aggiorna la visualizzazione degli utenti
         updateUsersDisplay();
     }
 
@@ -370,6 +401,10 @@ public class CreateNoteForm {
         updateSelectedTagsDisplay();
         updateSelectedUsersDisplay();
         updateUserSectionVisibility();
+        
+        // Aggiorna i conteggi caratteri
+        updateTitleCount();
+        updateContentCount();
     }
 
     public Button getCreateButton() { return createButton; }
@@ -392,5 +427,27 @@ public class CreateNoteForm {
     
     public String getWriteUsersAsString() {
         return String.join(",", selectedWriteUsers);
+    }
+    
+    private void updateTitleCount() {
+        int length = titleBox.getText().length();
+        titleCountLabel.setText(length + "/50 caratteri");
+        
+        if (length > 40) {
+            titleCountLabel.getElement().getStyle().setColor("orange");
+        } else {
+            titleCountLabel.getElement().getStyle().setColor("gray");
+        }
+    }
+    
+    private void updateContentCount() {
+        int length = contentArea.getText().length();
+        contentCountLabel.setText(length + "/280 caratteri");
+        
+        if (length > 250) {
+            contentCountLabel.getElement().getStyle().setColor("orange");
+        } else {
+            contentCountLabel.getElement().getStyle().setColor("gray");
+        }
     }
 }

@@ -79,7 +79,7 @@ public class NoteServiceImplTest {
 
     @Test
     void testCreateNoteTitleTooLong() {
-        String longTitle = "A".repeat(101);
+        String longTitle = "A".repeat(51);
         Note note = new Note(longTitle, "Contenuto valido", "marco");
         assertThrows(IllegalArgumentException.class, () -> service.createNote(note));
     }

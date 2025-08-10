@@ -30,7 +30,7 @@ public class HomePage {
         panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         panel.setSpacing(20);
         panel.setWidth("100%");
-       welcomeLabel.setStyleName("welcome-message");
+        welcomeLabel.setStyleName("welcome-message");
         registerButton.setStyleName("home-button");
         loginButton.setStyleName("home-button");
         addNoteButton.setStyleName("home-button");
@@ -206,6 +206,18 @@ public class HomePage {
             buttonPanel.add(deleteButton);
             noteItem.add(buttonPanel);
         }
+
+        // Pulsante modifica (solo se l'utente può modificare la nota)
+        if (currentUsername != null && note.canWrite(currentUsername)) {
+            Button editButton = new Button("Modifica");
+            editButton.setStyleName("form-button");
+            editButton.addClickHandler(event -> {
+                if (editNoteClickHandler != null) {
+                    editNoteClickHandler.onEditNote(note);
+                }
+            });
+            noteItem.add(editButton);
+        }
         
         // handler per click su parte principale della nota
         titleLabel.addDomHandler(event -> {
@@ -232,9 +244,15 @@ public class HomePage {
     public interface DeleteNoteHandler {
         void onDeleteNote(Note note);
     }
+
+    // interface per gestire la modifica di una nota
+    public interface EditNoteClickHandler {
+        void onEditNote(Note note);
+    }
     
     private NoteClickHandler onNoteClickHandler;
     private DeleteNoteHandler onDeleteNoteHandler;
+    private EditNoteClickHandler editNoteClickHandler;
     
     public void setNoteClickHandler(NoteClickHandler handler) {
         this.onNoteClickHandler = handler;
@@ -242,6 +260,10 @@ public class HomePage {
     
     public void setDeleteNoteHandler(DeleteNoteHandler handler) {
         this.onDeleteNoteHandler = handler;
+    }
+
+    public void setEditNoteClickHandler(EditNoteClickHandler handler) {
+        this.editNoteClickHandler = handler;
     }
 
     public Button getRegisterButton() { return registerButton; }

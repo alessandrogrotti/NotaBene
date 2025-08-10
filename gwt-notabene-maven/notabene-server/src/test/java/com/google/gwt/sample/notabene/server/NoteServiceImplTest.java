@@ -201,5 +201,83 @@ public class NoteServiceImplTest {
         assertEquals(0, service.getUserNotes("user2").size());
         assertEquals(0, service.getAccessibleNotes("user2").size());
     }
-        
+    
+    @Test
+    void testUpdateNoteTitleAndContent() {
+        Note note = new Note("Titolo iniziale", "Contenuto iniziale", "mario");
+        note.setPermission(NotePermission.PRIVATE);
+        service.createNote(note);
+
+        note.setTitle("Titolo modificato");
+        note.setContent("Contenuto modificato");
+        boolean result = service.updateNote(note, "mario");
+        assertTrue(result);
+
+        Note updated = service.getNoteById(note.getId(), "mario");
+        assertEquals("Titolo modificato", updated.getTitle());
+        assertEquals("Contenuto modificato", updated.getContent());
+    }
+
+    @Test
+    void testUpdateNoteTags() {
+        Note note = new Note("Titolo", "Contenuto", "mario");
+        note.setPermission(NotePermission.PRIVATE);
+        note.addTag("vecchioTag");
+        service.createNote(note);
+
+        note.getTags().clear();
+        note.addTag("nuovoTag");
+        boolean result = service.updateNote(note, "mario");
+        assertTrue(result);
+
+        Note updated = service.getNoteById(note.getId(), "mario");
+        assertTrue(updated.getTags().contains("nuovoTag"));
+        assertFalse(updated.getTags().contains("vecchioTag"));
+    }
+
+    @Test
+    void testUpdateNotePermissionsAndUsers() {
+        Note note = new Note("Titolo", "Contenuto", "mario");
+        note.setPermission(NotePermission.PRIVATE);
+        service.createNote(note);
+
+        note.setPermission(NotePermission.READ_WRITE);
+        note.getReadOnlyUsers().add("lettore");
+        note.getWriteUsers().add("scrittore");
+        boolean result = service.updateNote(note, "mario");
+        assertTrue(result);
+
+        Note updated = service.getNoteById(note.getId(), "mario");
+        assertEquals(NotePermission.READ_WRITE, updated.getPermission());
+        assertTrue(updated.getReadOnlyUsers().contains("lettore"));
+        assertTrue(updated.getWriteUsers().contains("scrittore"));
+    }
+
+    @Test
+    void testUpdateNoteByNonOwnerCannotChangePermissions() {
+        Note note = new Note("Titolo", "Contenuto", "mario");
+        note.setPermission(NotePermission.PRIVATE);
+        service.createNote(note);
+
+        note.setPermission(NotePermission.READ_WRITE);
+        note.getReadOnlyUsers().add("lettore");
+        note.getWriteUsers().add("scrittore");
+        boolean result = service.updateNote(note, "altroUtente");
+        assertFalse(result); 
+
+        Note updated = service.getNoteById(note.getId(), "mario");
+        assertEquals(NotePermission.PRIVATE, updated.getPermission());
+        assertTrue(updated.getReadOnlyUsers().isEmpty());
+        assertTrue(updated.getWriteUsers().isEmpty());
+    }
+
+    @Test
+    void testUpdateNoteNonExistent() {
+        Note note = new Note("Titolo", "Contenuto", "mario");
+        note.setId("nota_inesistente");
+        boolean result = service.updateNote(note, "mario");
+        assertFalse(result);
+    }
+
+  
 }

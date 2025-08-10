@@ -20,7 +20,7 @@ import com.google.gwt.sample.notabene.shared.NoteServiceAsync;
  
 public class NotaBene implements EntryPoint {
 
-     private final NoteServiceAsync noteService = GWT.create(NoteService.class);
+    private final NoteServiceAsync noteService = GWT.create(NoteService.class);
     private final UserServiceAsync userService = GWT.create(UserService.class);
     private User currentUser = null;
     private HomePage homePage;
@@ -28,32 +28,32 @@ public class NotaBene implements EntryPoint {
     private LoginForm loginForm;
     private TagManagementPage tagManagementPage;
     private CreateNoteForm createNoteForm;
+    private EditNoteForm editNoteForm;
     private NoteDetailPage noteDetailPage;
     private final TagServiceAsync tagService = GWT.create(TagService.class);
  
     //ENTRY POINT HOME PAGE BASIC
-   public void onModuleLoad() {
+    public void onModuleLoad() {
         homePage = new HomePage();
         registrationForm = new RegistrationForm();
         loginForm = new LoginForm();
         tagManagementPage = new TagManagementPage();
         createNoteForm = new CreateNoteForm();
+        editNoteForm = new EditNoteForm();
         noteDetailPage = new NoteDetailPage();
         setupEventHandlers();
         showHomePage();
-        
     }
 
-      private void showRegistrationForm() {
+    private void showRegistrationForm() {
         registrationForm.show();
     }
 
     private void showLoginForm() {
         loginForm.show();
     }
-    
   
-     private void showHomePage() {
+    private void showHomePage() {
         boolean isAuthenticated = currentUser != null;
         homePage.show(isAuthenticated, currentUser);
     }
@@ -62,12 +62,26 @@ public class NotaBene implements EntryPoint {
         if (currentUser != null) {
             tagManagementPage.show();
         }
+        editNoteForm = new EditNoteForm();
     }
     
     private void showCreateNoteForm() {
         if (currentUser != null) {
             createNoteForm.show();
         }
+    }
+
+    private void showEditNoteForm(Note note) {
+        if (editNoteForm == null) {
+            editNoteForm = new EditNoteForm();
+        }
+        editNoteForm.loadNote(note);
+        
+        // Controlla se l'utente corrente è l'autore della nota
+        boolean isAuthor = currentUser != null && currentUser.getUsername().equals(note.getOwnerUsername());
+        editNoteForm.setCurrentUserAuthor(isAuthor);
+        
+        editNoteForm.show();
     }
 
     private void showNoteDetail(Note note) {
@@ -147,7 +161,6 @@ public class NotaBene implements EntryPoint {
             }
         });
     }
-
 
    private void handleCreateNote() {
         String title = createNoteForm.getTitleBox().getText().trim();
@@ -253,6 +266,94 @@ public class NotaBene implements EntryPoint {
         });
     }
 
+    private void handleUpdateNote() {
+        String title = editNoteForm.getTitleBox().getText().trim();
+        String content = editNoteForm.getContentArea().getText().trim();
+        String permissionValue = editNoteForm.getPermissionBox().getSelectedValue();
+        Note currentNote = editNoteForm.getCurrentNote();
+        
+        if (title.isEmpty() || content.isEmpty()) {
+            Window.alert("Titolo e contenuto sono obbligatori!");
+            return;
+        }
+        
+        if (currentUser == null) {
+            Window.alert("Utente non autenticato!");
+            return;
+        }
+        
+        if (currentNote == null) {
+            Window.alert("Errore: nota da modificare non trovata!");
+            return;
+        }
+        
+        if (!currentNote.canWrite(currentUser.getUsername())) {
+            Window.alert("Non hai i permessi per modificare questa nota!");
+            return;
+        }
+        
+        currentNote.setTitle(title);
+        currentNote.setContent(content);
+        
+        boolean isAuthor = currentUser.getUsername().equals(currentNote.getOwnerUsername());
+        if (isAuthor) {
+            try {
+                NotePermission permission = NotePermission.valueOf(permissionValue);
+                currentNote.setPermission(permission);
+            } catch (Exception e) {
+                currentNote.setPermission(NotePermission.PRIVATE);
+            }
+            
+            currentNote.getReadOnlyUsers().clear();
+            currentNote.getWriteUsers().clear();
+            
+            if (!NotePermission.PRIVATE.name().equals(permissionValue)) {
+                for (String user : editNoteForm.getSelectedReadUsers()) {
+                    currentNote.getReadOnlyUsers().add(user);
+                }
+            }
+            
+            if (NotePermission.READ_WRITE.name().equals(permissionValue)) {
+                for (String user : editNoteForm.getSelectedWriteUsers()) {
+                    currentNote.getWriteUsers().add(user);
+                }
+            }
+        }
+        
+        currentNote.getTags().clear();
+        for (String tag : editNoteForm.getSelectedTags()) {
+            currentNote.addTag(tag);
+        }
+        
+        Button updateButton = editNoteForm.getUpdateButton();
+        updateButton.setEnabled(false);
+        updateButton.setText("Aggiornamento in corso...");
+        
+        noteService.updateNote(currentNote, currentUser.getUsername(), new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                updateButton.setEnabled(true);
+                updateButton.setText("Aggiorna Nota");
+                
+                Window.alert("Errore durante l'aggiornamento della nota: " + caught.getMessage());
+            }
+            
+            @Override
+            public void onSuccess(Boolean result) {
+                updateButton.setEnabled(true);
+                updateButton.setText("Aggiorna Nota");
+                
+                if (result) {
+                    Window.alert("Nota aggiornata con successo!");
+                    editNoteForm.clearForm();
+                    showHomePage();
+                } else {
+                    Window.alert("Errore durante l'aggiornamento della nota. Riprova più tardi.");
+                }
+            }
+        });
+    }
+
     //Pulisce i campi del form di login
     private void clearLoginForm() {
         loginForm.getUsernameBox().setText("");
@@ -273,30 +374,42 @@ public class NotaBene implements EntryPoint {
                 showRegistrationForm();
             }
         });
+
         homePage.getLoginButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 showLoginForm();
             }
         });
+
+        homePage.setEditNoteClickHandler(new HomePage.EditNoteClickHandler() {
+            @Override
+            public void onEditNote(Note note) {
+                showEditNoteForm(note);
+            }
+        });
+
         registrationForm.getConfirmButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 handleRegistration();
             }
         });
+
         registrationForm.getBackButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 showHomePage();
             }
         });
+
         loginForm.getConfirmButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 handleLogin();
             }
         });
+
         loginForm.getBackButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -378,6 +491,22 @@ public class NotaBene implements EntryPoint {
             @Override
             public void onDeleteNote(Note note) {
                 handleDeleteNote(note);
+            }
+        });
+
+        // handler per la modifica delle note
+        editNoteForm.getUpdateButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                handleUpdateNote();
+            }
+        });
+        
+        editNoteForm.getCancelButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                editNoteForm.clearForm();
+                showHomePage();
             }
         });
     }

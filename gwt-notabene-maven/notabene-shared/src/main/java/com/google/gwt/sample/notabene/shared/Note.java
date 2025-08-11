@@ -4,23 +4,31 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Note implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
+    // Dati della nota
     private String id;
     private String title;
     private String content;
     private String ownerUsername;
     private Date createdAt;
     private Date lastModified;
-    private String folderId;
     private Set<String> tags;
     private NotePermission permission;
     private Set<String> readOnlyUsers;
     private Set<String> writeUsers;
     
+    // Versionamento
+    private String currentVersionId;
+    private int versionNumber;
+    private String editorUsername;
+    private LinkedList<NoteVersion> versions;
+
     public Note() {
         this.tags = new HashSet<>();
         this.readOnlyUsers = new HashSet<>();
@@ -28,6 +36,8 @@ public class Note implements Serializable {
         this.permission = NotePermission.PRIVATE;
         this.createdAt = new Date();
         this.lastModified = new Date();
+        this.versions = new LinkedList<>();
+        this.versionNumber = 0;
     }
     
     public Note(String title, String content, String ownerUsername) {
@@ -46,8 +56,11 @@ public class Note implements Serializable {
     public void setId(String id) { this.id = id; }
     
     public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    
+    public void setTitle(String title) { 
+        this.title = title;
+        this.lastModified = new Date();
+    }
+
     public String getContent() { return content; }
     public void setContent(String content) { 
         this.content = content;
@@ -62,10 +75,7 @@ public class Note implements Serializable {
     
     public Date getLastModified() { return lastModified; }
     public void setLastModified(Date lastModified) { this.lastModified = lastModified; }
-    
-    public String getFolderId() { return folderId; }
-    public void setFolderId(String folderId) { this.folderId = folderId; }
-    
+
     public Set<String> getTags() { return tags; }
     public void setTags(Set<String> tags) { this.tags = tags; }
     
@@ -100,5 +110,47 @@ public class Note implements Serializable {
             return false;
         }
         return writeUsers.contains(username);
+    }
+    
+    public NoteVersion createVersion(String editorUsername) {
+        return new NoteVersion(this, editorUsername);
+    }
+    
+    public void addVersion(NoteVersion version) {
+        if (versions == null) {
+            versions = new LinkedList<>();
+        }
+        versions.addFirst(version);
+    }
+    
+    public boolean hasVersionHistory() {
+        return versions != null && !versions.isEmpty();
+    }
+    
+    public int getVersionCount() {
+        return versions != null ? versions.size() : 0;
+    }
+    
+    public String getCurrentVersionId() { return currentVersionId; }
+    public void setCurrentVersionId(String currentVersionId) { this.currentVersionId = currentVersionId; }
+    
+    public int getVersionNumber() { return versionNumber; }
+    public void setVersionNumber(int versionNumber) { this.versionNumber = versionNumber; }
+    
+    public String getEditorUsername() { return editorUsername; }
+    public void setEditorUsername(String editorUsername) { this.editorUsername = editorUsername; }
+    
+    public List<NoteVersion> getVersions() { 
+        return versions != null ? new LinkedList<>(versions) : new LinkedList<>(); 
+    }
+    public void setVersions(LinkedList<NoteVersion> versions) { this.versions = versions; }
+    
+    public void markAsModified(String editorUsername) {
+        this.lastModified = new Date();
+        this.editorUsername = editorUsername;
+    }
+    
+    public void incrementVersionNumber() {
+        this.versionNumber++;
     }
 }

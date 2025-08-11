@@ -1,9 +1,10 @@
 package com.google.gwt.sample.notabene.server;
 
 import java.util.List;
-
+import java.util.LinkedList;
 import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
+import com.google.gwt.sample.notabene.shared.NoteVersion;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class NoteServiceImpl extends RemoteServiceServlet implements NoteService {
@@ -52,7 +53,7 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
                 throw new IllegalArgumentException("Esiste già una nota con questo ID");
             }
             
-        
+            note.setVersionNumber(0);
             boolean result = noteRepository.saveNote(note);
             
             if (result) {
@@ -131,6 +132,37 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
             
             if (existingNote == null || !existingNote.canWrite(username)) {
                 return false;
+            }
+
+            if (!existingNote.getContent().equals(note.getContent()) || 
+                !existingNote.getTitle().equals(note.getTitle()) ||
+                !existingNote.getTags().equals(note.getTags())) {
+
+                NoteVersion version = existingNote.createVersion(username);
+                existingNote.addVersion(version);
+
+                existingNote.incrementVersionNumber();
+
+                System.out.println("Creata versione " + version.getVersionNumber() + 
+                                " per la nota " + existingNote.getId() + 
+                                " da parte dell'utente " + username);
+
+                note.markAsModified(username);
+
+                note.setVersionNumber(existingNote.getVersionNumber());
+                if (existingNote.getVersions() instanceof LinkedList) {
+                    note.setVersions((LinkedList<NoteVersion>) existingNote.getVersions());
+                } else {
+                    note.setVersions(new LinkedList<>(existingNote.getVersions()));
+                }
+            } else {
+                note.markAsModified(username);
+                note.setVersionNumber(existingNote.getVersionNumber());
+                if (existingNote.getVersions() instanceof LinkedList) {
+                    note.setVersions((LinkedList<NoteVersion>) existingNote.getVersions());
+                } else {
+                    note.setVersions(new LinkedList<>(existingNote.getVersions()));
+                }
             }
 
             return noteRepository.saveNote(note);

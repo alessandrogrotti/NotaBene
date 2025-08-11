@@ -15,6 +15,7 @@ public class NoteDetailPage {
     private FlowPanel tagsPanel = new FlowPanel();
     private Button backButton = new Button("Torna alla Lista");
     private Button deleteButton = new Button("Elimina Nota");
+    private Button versionHistoryButton = new Button("Cronologia Versioni");
     private HorizontalPanel buttonPanel = new HorizontalPanel();
     
     private Note currentNote; // Per tenere traccia della nota corrente
@@ -31,7 +32,6 @@ public class NoteDetailPage {
         panel.setWidth("90%");
         panel.setStyleName("form-container"); // Aggiunge il container stilizzato
         
-       
         titleLabel.setStyleName("form-title");
         authorLabel.setStyleName("form-label");
         createdDateLabel.setStyleName("form-label");
@@ -39,12 +39,13 @@ public class NoteDetailPage {
         contentArea.setStyleName("note-detail-content");
         tagsPanel.setStyleName("note-detail-tags");
         backButton.setStyleName("back-button");
+        versionHistoryButton.setStyleName("version-history-button");
         deleteButton.setStyleName("delete-button");
         
         buttonPanel.setSpacing(10);
         buttonPanel.add(backButton);
         buttonPanel.add(deleteButton);
-        
+        buttonPanel.add(versionHistoryButton);
         
         panel.add(buttonPanel);
         panel.add(titleLabel);
@@ -89,10 +90,20 @@ public class NoteDetailPage {
         }
         
         if (note.getLastModified() != null) {
-            lastModifiedLabel.setText("Ultima modifica: " + dateFormat.format(note.getLastModified()));
+            String lastModifiedText = "Ultima modifica: " + dateFormat.format(note.getLastModified());
+            if (note.getEditorUsername() != null && !note.getEditorUsername().equals(note.getOwnerUsername())) {
+                lastModifiedText += " da " + note.getEditorUsername();
+            }
+            lastModifiedLabel.setText(lastModifiedText);
         } else {
             lastModifiedLabel.setText("Data ultima modifica non disponibile");
         }
+
+        String versionInfo = " (v" + note.getVersionNumber() + ")";
+        lastModifiedLabel.setText(lastModifiedLabel.getText() + versionInfo);
+        
+        // Abilita/disabilita il pulsante cronologia versioni
+        versionHistoryButton.setVisible(note.hasVersionHistory());
         
         // mostra il contenuto 
         String content = note.getContent();
@@ -142,5 +153,9 @@ public class NoteDetailPage {
     
     public Note getCurrentNote() {
         return currentNote;
+    }
+
+    public Button getVersionHistoryButton() {
+        return versionHistoryButton;
     }
 }

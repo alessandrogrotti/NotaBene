@@ -17,10 +17,13 @@ import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NotePermission;
 import com.google.gwt.sample.notabene.shared.NoteService;
 import com.google.gwt.sample.notabene.shared.NoteServiceAsync;
+import com.google.gwt.sample.notabene.shared.NoteVersionService;
+import com.google.gwt.sample.notabene.shared.NoteVersionServiceAsync;
  
 public class NotaBene implements EntryPoint {
 
     private final NoteServiceAsync noteService = GWT.create(NoteService.class);
+    private final NoteVersionServiceAsync versionService = GWT.create(NoteVersionService.class);
     private final UserServiceAsync userService = GWT.create(UserService.class);
     private User currentUser = null;
     private HomePage homePage;
@@ -30,6 +33,7 @@ public class NotaBene implements EntryPoint {
     private CreateNoteForm createNoteForm;
     private EditNoteForm editNoteForm;
     private NoteDetailPage noteDetailPage;
+    private NoteVersionHistoryPage versionHistoryPage;
     private final TagServiceAsync tagService = GWT.create(TagService.class);
  
     //ENTRY POINT HOME PAGE BASIC
@@ -41,6 +45,7 @@ public class NotaBene implements EntryPoint {
         createNoteForm = new CreateNoteForm();
         editNoteForm = new EditNoteForm();
         noteDetailPage = new NoteDetailPage();
+        versionHistoryPage = new NoteVersionHistoryPage();
         setupEventHandlers();
         showHomePage();
     }
@@ -478,6 +483,22 @@ public class NotaBene implements EntryPoint {
             }
         });
 
+        // handler per il pulsante "Cronologia Versioni" nella pagina di dettaglio
+        noteDetailPage.getVersionHistoryButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showVersionHistory(noteDetailPage.getCurrentNote());
+            }
+        });
+        
+        // handler per il pulsante "Torna alla Nota" nella pagina cronologia versioni
+        versionHistoryPage.getBackButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                showNoteDetail(noteDetailPage.getCurrentNote());
+            }
+        });
+
         // handler per i click sulle note nella homepage
         homePage.setNoteClickHandler(new HomePage.NoteClickHandler() {
             @Override
@@ -509,5 +530,15 @@ public class NotaBene implements EntryPoint {
                 showHomePage();
             }
         });
+    }
+
+    private void showVersionHistory(Note note) {
+        if (note == null) {
+            Window.alert("Errore: nota non trovata");
+            return;
+        }
+        
+        versionHistoryPage.showVersionHistory(note);
+        versionHistoryPage.show();
     }
 }

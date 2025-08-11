@@ -43,4 +43,15 @@
     <url-pattern>/app/noteService</url-pattern>
   </servlet-mapping>
 
+  <!-- Note Version Service Servlet -->
+  <servlet>
+    <servlet-name>noteVersionService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.NoteVersionServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>noteVersionService</servlet-name>
+    <url-pattern>/app/noteVersionService</url-pattern>
+  </servlet-mapping>
+
 </web-app>

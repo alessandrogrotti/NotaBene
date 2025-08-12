@@ -91,8 +91,7 @@ public class NotaBene implements EntryPoint {
 
     private void showNoteDetail(Note note) {
         if (currentUser != null && note != null) {
-            noteDetailPage.showNote(note);
-            noteDetailPage.setDeleteButtonVisible(true, currentUser.getUsername());
+            noteDetailPage.showNote(note, currentUser.getUsername());
             noteDetailPage.show();
         }
     }
@@ -387,12 +386,6 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-        homePage.setEditNoteClickHandler(new HomePage.EditNoteClickHandler() {
-            @Override
-            public void onEditNote(Note note) {
-                showEditNoteForm(note);
-            }
-        });
 
         registrationForm.getConfirmButton().addClickHandler(new ClickHandler() {
             @Override
@@ -479,7 +472,21 @@ public class NotaBene implements EntryPoint {
         noteDetailPage.getDeleteButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                handleDeleteNote(noteDetailPage.getCurrentNote());
+                Note note = noteDetailPage.getCurrentNote();
+                if (note != null) {
+                    handleDeleteNote(note);
+                }
+            }
+        });
+
+        // handler per il pulsante "Modifica" nella pagina di dettaglio
+        noteDetailPage.getEditButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Note note = noteDetailPage.getCurrentNote();
+                if (note != null) {
+                    showEditNoteForm(note);
+                }
             }
         });
 
@@ -504,14 +511,6 @@ public class NotaBene implements EntryPoint {
             @Override
             public void onNoteClick(Note note) {
                 showNoteDetail(note);
-            }
-        });
-
-        // handler per l'eliminazione delle note dalla homepage
-        homePage.setDeleteNoteHandler(new HomePage.DeleteNoteHandler() {
-            @Override
-            public void onDeleteNote(Note note) {
-                handleDeleteNote(note);
             }
         });
 

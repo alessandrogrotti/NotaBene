@@ -114,20 +114,27 @@ public class NoteVersionHistoryPage {
         dateLabel.setStyleName("version-date");
         
         String editor = currentNote.getEditorUsername() != null ? 
-                      currentNote.getEditorUsername() : currentNote.getOwnerUsername();
+                    currentNote.getEditorUsername() : currentNote.getOwnerUsername();
         Label editorLabel = new Label("Modificata da: " + editor);
         editorLabel.setStyleName("version-editor");
+            
+        FlowPanel meta = new FlowPanel();
+        meta.setStyleName("version-info");
+        meta.add(dateLabel);
+        meta.add(editorLabel);
         
         Label titleLabel = new Label("Titolo: " + currentNote.getTitle());
         titleLabel.setStyleName("version-title");
         
         HTML contentArea = new HTML();
         String content = currentNote.getContent();
-        if (content.length() > 100) {
-            content = content.substring(0, 100) + "...";
-        }
         contentArea.setHTML("<div class='version-content'>Contenuto: " + content + "</div>");
-        
+            
+        panel.add(currentLabel);
+        panel.add(meta);
+        panel.add(titleLabel);
+        panel.add(contentArea);
+
         if (!currentNote.getTags().isEmpty()) {
             FlowPanel tagsPanel = new FlowPanel();
             tagsPanel.setStyleName("version-tags");
@@ -140,13 +147,7 @@ public class NoteVersionHistoryPage {
             }
             panel.add(tagsPanel);
         }
-        
-        panel.add(currentLabel);
-        panel.add(dateLabel);
-        panel.add(editorLabel);
-        panel.add(titleLabel);
-        panel.add(contentArea);
-        
+
         return panel;
     }
     
@@ -159,39 +160,36 @@ public class NoteVersionHistoryPage {
         HorizontalPanel headerPanel = new HorizontalPanel();
         headerPanel.setWidth("100%");
         headerPanel.setStyleName("version-header");
-        
+
         Label versionLabel = new Label("Versione " + version.getVersionNumber());
         versionLabel.setStyleName("version-number");
-        
+
         Label dateLabel = new Label(dateFormat.format(version.getVersionCreatedAt()));
         dateLabel.setStyleName("version-date");
-        
+
         Label editorLabel = new Label("da " + version.getEditorUsername());
         editorLabel.setStyleName("version-editor");
-        
-        Button viewButton = new Button("Visualizza");
-        viewButton.setStyleName("version-view-button");
-        viewButton.addClickHandler(event -> showVersionDetails(version));
-        
-        headerPanel.add(versionLabel);
-        headerPanel.add(dateLabel);
-        headerPanel.add(editorLabel);
-        headerPanel.add(viewButton);
-        
+
+        FlowPanel headerLeft = new FlowPanel();
+        headerLeft.add(versionLabel);
+        headerLeft.add(dateLabel);
+        headerLeft.add(editorLabel);
+        headerLeft.setStyleName("version-info");
+
+        headerPanel.add(headerLeft);
+        headerPanel.setCellWidth(headerLeft, "100%");
+
         Label titleLabel = new Label("Titolo: " + version.getTitle());
         titleLabel.setStyleName("version-title");
-        
+
         HTML contentArea = new HTML();
         String content = version.getContent();
-        if (content.length() > 100) {
-            content = content.substring(0, 100) + "...";
-        }
         contentArea.setHTML("<div class='version-content-preview'>Contenuto: " + content + "</div>");
-        
+
         panel.add(headerPanel);
         panel.add(titleLabel);
         panel.add(contentArea);
-        
+
         if (!version.getTags().isEmpty()) {
             FlowPanel tagsPanel = new FlowPanel();
             tagsPanel.setStyleName("version-tags");
@@ -209,15 +207,57 @@ public class NoteVersionHistoryPage {
     }
     
     private void showVersionDetails(NoteVersion version) {
-        Note versionNote = version.toReadOnlyNote();
-        
-        String message = "Versione " + version.getVersionNumber() + "\n" +
-                        "Data: " + dateFormat.format(version.getVersionCreatedAt()) + "\n" +
-                        "Editor: " + version.getEditorUsername() + "\n\n" +
-                        "Titolo: " + version.getTitle() + "\n\n" +
-                        "Contenuto:\n" + version.getContent();
-        
-        Window.alert(message);
+        DialogBox dialog = new DialogBox(true, true);
+        dialog.setStyleName("version-dialog");
+        dialog.setText("Dettagli versione v" + version.getVersionNumber());
+
+        VerticalPanel body = new VerticalPanel();
+        body.setStyleName("dialog-body");
+        body.setWidth("100%");
+
+        FlowPanel chips = new FlowPanel();
+        chips.setStyleName("version-info");
+        Label dateChip = new Label(dateFormat.format(version.getVersionCreatedAt()));
+        dateChip.setStyleName("version-date");
+        Label editorChip = new Label("da " + version.getEditorUsername());
+        editorChip.setStyleName("version-editor");
+        chips.add(dateChip);
+        chips.add(editorChip);
+
+        Label title = new Label("Titolo: " + version.getTitle());
+        title.setStyleName("version-title");
+
+        HTML content = new HTML("<div class='version-content'>" + version.getContent() + "</div>");
+
+        body.add(chips);
+        body.add(title);
+        body.add(content);
+
+        if (!version.getTags().isEmpty()) {
+            FlowPanel tagsPanel = new FlowPanel();
+            tagsPanel.setStyleName("version-tags");
+            tagsPanel.add(new Label("Tag: "));
+            for (String tag : version.getTags()) {
+                Label tagLabel = new Label(tag);
+                tagLabel.setStyleName("tag-label-small");
+                tagsPanel.add(tagLabel);
+            }
+            body.add(tagsPanel);
+        }
+
+        HorizontalPanel actions = new HorizontalPanel();
+        actions.setStyleName("dialog-actions");
+        Button closeBtn = new Button("Chiudi");
+        closeBtn.addClickHandler(e -> dialog.hide());
+        actions.add(closeBtn);
+
+        VerticalPanel container = new VerticalPanel();
+        container.add(body);
+        container.add(actions);
+
+        dialog.setWidget(container);
+        dialog.center();
+        dialog.show();
     }
     
     public void show() {

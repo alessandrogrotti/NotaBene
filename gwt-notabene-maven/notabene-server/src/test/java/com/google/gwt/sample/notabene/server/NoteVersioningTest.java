@@ -6,6 +6,7 @@ import com.google.gwt.sample.notabene.shared.NoteVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.Date;
 import java.util.List;
 
 public class NoteVersioningTest {
@@ -179,5 +180,108 @@ public class NoteVersioningTest {
         assertTrue(readOnlyNote.getTags().contains("tag1"));
         assertTrue(readOnlyNote.getTags().contains("tag2"));
         assertEquals("testuser", readOnlyNote.getOwnerUsername());
+    }
+    
+    @Test
+    void testVersionCreationDateIsCorrect() throws InterruptedException {
+        Note note = new Note("Titolo iniziale", "Contenuto iniziale", "testuser");
+        note.setPermission(NotePermission.PRIVATE);
+        assertTrue(noteService.createNote(note));
+        
+        String noteId = note.getId();
+        
+        Thread.sleep(10);
+        
+        Note originalNote = noteRepository.getNote(noteId);
+        assertNotNull(originalNote);
+        Date originalLastModified = originalNote.getLastModified();
+        assertNotNull(originalLastModified);
+        
+        Thread.sleep(10);
+        
+        Note modifiedNote = new Note("Titolo modificato", "Contenuto modificato", "testuser");
+        modifiedNote.setId(noteId);
+        modifiedNote.setPermission(originalNote.getPermission());
+        
+        assertTrue(noteService.updateNote(modifiedNote, "testuser"));
+        
+        List<NoteVersion> versions = versionService.getNoteVersions(noteId);
+        assertEquals(1, versions.size());
+        
+        NoteVersion version = versions.get(0);
+        
+        long timeDifference = Math.abs(version.getVersionCreatedAt().getTime() - originalLastModified.getTime());
+        assertTrue(timeDifference < 100, // Tolleranza di 100ms
+                "La data di creazione della versione (" + version.getVersionCreatedAt().getTime() + 
+                ") dovrebbe essere vicina alla data dell'ultima modifica della nota originale (" + 
+                originalLastModified.getTime() + "). Differenza: " + timeDifference + "ms");
+        
+        Note updatedNote = noteRepository.getNote(noteId);
+        assertTrue(updatedNote.getLastModified().after(originalLastModified),
+                "La data di ultima modifica della nota dovrebbe essere successiva alla data originale");
+    }
+    
+    @Test
+    void testMultipleVersionsHaveCorrectDates() throws InterruptedException {
+        Note note = new Note("Versione 0", "Contenuto v0", "testuser");
+        assertTrue(noteService.createNote(note));
+        String noteId = note.getId();
+        
+        Thread.sleep(10);
+        Note note1 = noteRepository.getNote(noteId);
+        Date firstModificationTime = note1.getLastModified();
+        
+        Note modifiedNote1 = new Note("Versione 1", "Contenuto v1", "testuser");
+        modifiedNote1.setId(noteId);
+        modifiedNote1.setPermission(note1.getPermission());
+        assertTrue(noteService.updateNote(modifiedNote1, "testuser"));
+        
+        Thread.sleep(10);
+        Note note2 = noteRepository.getNote(noteId);
+        Date secondModificationTime = note2.getLastModified();
+        
+        Note modifiedNote2 = new Note("Versione 2", "Contenuto v2", "testuser");
+        modifiedNote2.setId(noteId);
+        modifiedNote2.setPermission(note2.getPermission());
+        assertTrue(noteService.updateNote(modifiedNote2, "testuser"));
+        
+        List<NoteVersion> versions = versionService.getNoteVersions(noteId);
+        assertEquals(2, versions.size());
+        
+        NoteVersion firstVersion = versions.get(0);
+        long timeDiff1 = Math.abs(firstVersion.getVersionCreatedAt().getTime() - secondModificationTime.getTime());
+        assertTrue(timeDiff1 < 100, // Tolleranza di 100ms
+                "La prima versione dovrebbe avere una data vicina alla seconda modifica. " +
+                "Atteso: " + secondModificationTime.getTime() + ", Ottenuto: " + firstVersion.getVersionCreatedAt().getTime() +
+                ", Differenza: " + timeDiff1 + "ms");
+        assertEquals("Versione 1", firstVersion.getTitle());
+        
+        NoteVersion secondVersion = versions.get(1);
+        long timeDiff2 = Math.abs(secondVersion.getVersionCreatedAt().getTime() - firstModificationTime.getTime());
+        assertTrue(timeDiff2 < 100, // Tolleranza di 100ms
+                "La seconda versione dovrebbe avere una data vicina alla prima modifica. " +
+                "Atteso: " + firstModificationTime.getTime() + ", Ottenuto: " + secondVersion.getVersionCreatedAt().getTime() +
+                ", Differenza: " + timeDiff2 + "ms");
+        assertEquals("Versione 0", secondVersion.getTitle());
+    }
+    
+    @Test
+    void testVersionDateWhenNoteHasNoLastModified() {
+        Note note = new Note("Titolo", "Contenuto", "testuser");
+        note.setPermission(NotePermission.PRIVATE);
+        
+        Date beforeCreation = new Date();
+        
+        NoteVersion version = note.createVersion("testuser");
+        
+        Date afterCreation = new Date();
+        
+        assertNotNull(version.getVersionCreatedAt());
+        assertTrue(version.getVersionCreatedAt().after(beforeCreation) || 
+                  version.getVersionCreatedAt().equals(beforeCreation),
+                "La data della versione dovrebbe essere >= alla data prima della creazione");
+        assertTrue(version.getVersionCreatedAt().before(afterCreation) || 
+                  version.getVersionCreatedAt().equals(afterCreation),
+                "La data della versione dovrebbe essere <= alla data dopo la creazione");
     }
 }

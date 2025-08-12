@@ -32,9 +32,9 @@ public class NoteVersion implements Serializable {
         this.title = note.getTitle();
         this.content = note.getContent();
         this.tags = note.getTags() != null ? new HashSet<>(note.getTags()) : new HashSet<>();
-        // La versione salvata mantiene il numero di versione che aveva la nota prima dell'incremento
         this.versionNumber = note.getVersionNumber();
         this.editorUsername = editorUsername;
+        this.versionCreatedAt = note.getLastModified() != null ? new Date(note.getLastModified().getTime()) : new Date();
         this.versionId = generateVersionId(note.getId(), this.versionNumber);
     }
     

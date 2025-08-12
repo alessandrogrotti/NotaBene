@@ -140,32 +140,44 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
 
                 NoteVersion version = existingNote.createVersion(username);
                 existingNote.addVersion(version);
-
                 existingNote.incrementVersionNumber();
 
                 System.out.println("Creata versione " + version.getVersionNumber() + 
                                 " per la nota " + existingNote.getId() + 
                                 " da parte dell'utente " + username);
 
-                note.markAsModified(username);
+                existingNote.setTitle(note.getTitle());
+                existingNote.setContent(note.getContent());
+                existingNote.setTags(note.getTags());
+                existingNote.setPermission(note.getPermission());
+                existingNote.setReadOnlyUsers(note.getReadOnlyUsers());
+                existingNote.setWriteUsers(note.getWriteUsers());
+                existingNote.markAsModified(username);
 
                 note.setVersionNumber(existingNote.getVersionNumber());
+                note.setLastModified(existingNote.getLastModified());
                 if (existingNote.getVersions() instanceof LinkedList) {
                     note.setVersions((LinkedList<NoteVersion>) existingNote.getVersions());
                 } else {
                     note.setVersions(new LinkedList<>(existingNote.getVersions()));
                 }
+                
+                return noteRepository.saveNote(existingNote);
             } else {
-                note.markAsModified(username);
+                existingNote.setPermission(note.getPermission());
+                existingNote.setReadOnlyUsers(note.getReadOnlyUsers());
+                existingNote.setWriteUsers(note.getWriteUsers());
+                existingNote.markAsModified(username);
                 note.setVersionNumber(existingNote.getVersionNumber());
+                note.setLastModified(existingNote.getLastModified());
                 if (existingNote.getVersions() instanceof LinkedList) {
                     note.setVersions((LinkedList<NoteVersion>) existingNote.getVersions());
                 } else {
                     note.setVersions(new LinkedList<>(existingNote.getVersions()));
                 }
+                
+                return noteRepository.saveNote(existingNote);
             }
-
-            return noteRepository.saveNote(note);
         } catch (Exception e) {
             System.err.println("Errore durante l'aggiornamento della nota: " + e.getMessage());
             e.printStackTrace();

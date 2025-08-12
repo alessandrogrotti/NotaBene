@@ -188,37 +188,6 @@ public class HomePage {
             noteItem.add(tagsPanel);
         }
         
-        // pannello per i pulsanti (solo se l'utente è il proprietario)
-        if (currentUsername != null && currentUsername.equals(note.getOwnerUsername())) {
-            HorizontalPanel buttonPanel = new HorizontalPanel();
-            buttonPanel.setSpacing(10);
-            buttonPanel.setStyleName("note-item-buttons");
-            
-            Button deleteButton = new Button("Elimina");
-            deleteButton.setStyleName("delete-button");
-            deleteButton.addClickHandler(event -> {
-                event.stopPropagation(); // per mantere click solo sul pulsante
-                if (onDeleteNoteHandler != null) {
-                    onDeleteNoteHandler.onDeleteNote(note);
-                }
-            });
-            
-            buttonPanel.add(deleteButton);
-            noteItem.add(buttonPanel);
-        }
-
-        // Pulsante modifica (solo se l'utente può modificare la nota)
-        if (currentUsername != null && note.canWrite(currentUsername)) {
-            Button editButton = new Button("Modifica");
-            editButton.setStyleName("form-button");
-            editButton.addClickHandler(event -> {
-                if (editNoteClickHandler != null) {
-                    editNoteClickHandler.onEditNote(note);
-                }
-            });
-            noteItem.add(editButton);
-        }
-        
         // handler per click su parte principale della nota
         titleLabel.addDomHandler(event -> {
             if (onNoteClickHandler != null) {
@@ -239,32 +208,12 @@ public class HomePage {
     public interface NoteClickHandler {
         void onNoteClick(Note note);
     }
-
-    // interface per gestire l'eliminazione delle note
-    public interface DeleteNoteHandler {
-        void onDeleteNote(Note note);
-    }
-
-    // interface per gestire la modifica di una nota
-    public interface EditNoteClickHandler {
-        void onEditNote(Note note);
-    }
-    
     private NoteClickHandler onNoteClickHandler;
-    private DeleteNoteHandler onDeleteNoteHandler;
-    private EditNoteClickHandler editNoteClickHandler;
     
     public void setNoteClickHandler(NoteClickHandler handler) {
         this.onNoteClickHandler = handler;
     }
     
-    public void setDeleteNoteHandler(DeleteNoteHandler handler) {
-        this.onDeleteNoteHandler = handler;
-    }
-
-    public void setEditNoteClickHandler(EditNoteClickHandler handler) {
-        this.editNoteClickHandler = handler;
-    }
 
     public Button getRegisterButton() { return registerButton; }
     public Button getLoginButton() { return loginButton; }

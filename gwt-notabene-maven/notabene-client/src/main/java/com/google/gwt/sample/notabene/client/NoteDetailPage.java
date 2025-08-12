@@ -15,9 +15,12 @@ public class NoteDetailPage {
     private FlowPanel tagsPanel = new FlowPanel();
     private Button backButton = new Button("Torna alla Lista");
     private Button deleteButton = new Button("Elimina Nota");
+    private Button editButton = new Button("Modifica Nota");
+    private Button versionHistoryButton = new Button("Cronologia Versioni");
     private HorizontalPanel buttonPanel = new HorizontalPanel();
     
-    private Note currentNote; // Per tenere traccia della nota corrente
+    private Note currentNote;
+    private String currentUsername;
     
     private static final DateTimeFormat dateFormat = DateTimeFormat.getFormat("dd/MM/yyyy HH:mm");
     
@@ -29,9 +32,8 @@ public class NoteDetailPage {
         panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         panel.setSpacing(20);
         panel.setWidth("90%");
-        panel.setStyleName("form-container"); // Aggiunge il container stilizzato
+        panel.setStyleName("form-container");
         
-       
         titleLabel.setStyleName("form-title");
         authorLabel.setStyleName("form-label");
         createdDateLabel.setStyleName("form-label");
@@ -39,12 +41,15 @@ public class NoteDetailPage {
         contentArea.setStyleName("note-detail-content");
         tagsPanel.setStyleName("note-detail-tags");
         backButton.setStyleName("back-button");
+        versionHistoryButton.setStyleName("version-history-button");
         deleteButton.setStyleName("delete-button");
+        editButton.setStyleName("edit-button");
         
         buttonPanel.setSpacing(10);
         buttonPanel.add(backButton);
         buttonPanel.add(deleteButton);
-        
+        buttonPanel.add(editButton);
+        buttonPanel.add(versionHistoryButton);
         
         panel.add(buttonPanel);
         panel.add(titleLabel);
@@ -65,8 +70,9 @@ public class NoteDetailPage {
         panel.add(tagsPanel);
     }
     
-    public void showNote(Note note) {
+    public void showNote(Note note, String username) {
         this.currentNote = note; 
+        this.currentUsername = username; 
         
         if (note == null) {
             titleLabel.setText("Nota non trovata");
@@ -76,6 +82,8 @@ public class NoteDetailPage {
             contentArea.setHTML("");
             tagsPanel.clear();
             deleteButton.setVisible(false);
+            editButton.setVisible(false);
+            versionHistoryButton.setVisible(false);
             return;
         }
         
@@ -89,10 +97,24 @@ public class NoteDetailPage {
         }
         
         if (note.getLastModified() != null) {
-            lastModifiedLabel.setText("Ultima modifica: " + dateFormat.format(note.getLastModified()));
+            String lastModifiedText = "Ultima modifica: " + dateFormat.format(note.getLastModified());
+            if (note.getEditorUsername() != null && !note.getEditorUsername().equals(note.getOwnerUsername())) {
+                lastModifiedText += " da " + note.getEditorUsername();
+            }
+            lastModifiedLabel.setText(lastModifiedText);
         } else {
             lastModifiedLabel.setText("Data ultima modifica non disponibile");
         }
+
+        String versionInfo = " (v" + note.getVersionNumber() + ")";
+        lastModifiedLabel.setText(lastModifiedLabel.getText() + versionInfo);
+        
+        boolean isOwner = currentUsername != null && currentUsername.equals(note.getOwnerUsername());
+        boolean canWrite = currentUsername != null && note.canWrite(currentUsername);
+
+        deleteButton.setVisible(isOwner);
+        editButton.setVisible(canWrite);
+        versionHistoryButton.setVisible(note.hasVersionHistory());
         
         // mostra il contenuto 
         String content = note.getContent();
@@ -122,25 +144,24 @@ public class NoteDetailPage {
         RootPanel.get("list").clear();
         RootPanel.get("list").add(panel);
     }
-    
-    public void setDeleteButtonVisible(boolean visible, String currentUsername) {
-        if (currentNote != null && currentUsername != null) {
-            boolean isOwner = currentUsername.equals(currentNote.getOwnerUsername());
-            deleteButton.setVisible(visible && isOwner);
-        } else {
-            deleteButton.setVisible(false);
-        }
-    }
-    
-    public Button getBackButton() { 
-        return backButton; 
+
+    public Button getBackButton() {
+        return backButton;
     }
     
     public Button getDeleteButton() {
         return deleteButton;
     }
+
+    public Button getEditButton() {
+        return editButton;
+    }
     
     public Note getCurrentNote() {
         return currentNote;
+    }
+
+    public Button getVersionHistoryButton() {
+        return versionHistoryButton;
     }
 }

@@ -138,7 +138,7 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
                 !existingNote.getTitle().equals(note.getTitle()) ||
                 !existingNote.getTags().equals(note.getTags())) {
 
-                NoteVersion version = existingNote.createVersion(username);
+                NoteVersion version = existingNote.createVersion();
                 existingNote.addVersion(version);
                 existingNote.incrementVersionNumber();
 

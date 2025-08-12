@@ -23,7 +23,7 @@ public class NoteVersion implements Serializable {
         this.versionCreatedAt = new Date();
     }
     
-    public NoteVersion(Note note, String editorUsername) {
+    public NoteVersion(Note note) {
         this();
         if (note == null) {
             throw new IllegalArgumentException("Note cannot be null");
@@ -33,7 +33,7 @@ public class NoteVersion implements Serializable {
         this.content = note.getContent();
         this.tags = note.getTags() != null ? new HashSet<>(note.getTags()) : new HashSet<>();
         this.versionNumber = note.getVersionNumber();
-        this.editorUsername = editorUsername;
+        this.editorUsername = note.getEditorUsername() != null ? note.getEditorUsername() : note.getOwnerUsername();
         this.versionCreatedAt = note.getLastModified() != null ? new Date(note.getLastModified().getTime()) : new Date();
         this.versionId = generateVersionId(note.getId(), this.versionNumber);
     }

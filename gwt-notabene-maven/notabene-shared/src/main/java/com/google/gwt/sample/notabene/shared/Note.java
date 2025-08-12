@@ -112,8 +112,8 @@ public class Note implements Serializable {
         return writeUsers.contains(username);
     }
     
-    public NoteVersion createVersion(String editorUsername) {
-        return new NoteVersion(this, editorUsername);
+    public NoteVersion createVersion() {
+        return new NoteVersion(this);
     }
     
     public void addVersion(NoteVersion version) {

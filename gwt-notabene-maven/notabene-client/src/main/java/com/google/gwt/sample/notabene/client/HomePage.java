@@ -139,10 +139,10 @@ public class HomePage {
     
     private void createNoteItem(Note note, VerticalPanel container) {
         VerticalPanel noteItem = new VerticalPanel();
-        noteItem.setStyleName("note-item");
-        noteItem.addStyleName("clickable-item");
-        noteItem.setWidth("80%");
-        noteItem.setSpacing(8);
+    noteItem.setStyleName("note-item");
+    noteItem.addStyleName("clickable-item");
+    noteItem.setWidth("100%"); 
+    noteItem.setSpacing(8);
         
         // Titolo della nota (cliccabile)
         Label titleLabel = new Label(note.getTitle());

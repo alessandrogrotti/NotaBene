@@ -20,4 +20,6 @@ public interface NoteService extends RemoteService {
     boolean updateNote(Note note, String username);
 
     boolean deleteNote(String noteId, String username);
+    
+    Note duplicateNote(String noteId, String username) throws IllegalArgumentException;
 }

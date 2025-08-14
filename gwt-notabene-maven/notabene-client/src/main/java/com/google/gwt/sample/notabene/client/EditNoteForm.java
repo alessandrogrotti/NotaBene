@@ -58,9 +58,10 @@ public class EditNoteForm {
     }
 
     private void setupForm() {
-        panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
-        panel.setSpacing(15);
-        panel.setWidth("80%");
+    panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+    panel.setSpacing(15);
+    panel.setWidth("80%");
+    panel.setStyleName("form-container"); 
         formTitle.setStyleName("form-title");
         titleLabel.setStyleName("form-label");
         contentLabel.setStyleName("form-label");
@@ -77,7 +78,7 @@ public class EditNoteForm {
         permissionBox.setStyleName("form-input");
         permissionBox.setWidth("400px");
         updateButton.setStyleName("form-button");
-        cancelButton.setStyleName("back-button");
+    cancelButton.setStyleName("back-button form-cancel-lower");
         
         permissionBox.addItem(NotePermission.PRIVATE.getDisplayName(), NotePermission.PRIVATE.name());
         permissionBox.addItem(NotePermission.READ_ONLY.getDisplayName(), NotePermission.READ_ONLY.name());
@@ -90,9 +91,12 @@ public class EditNoteForm {
         setupTagsSection();
         setupUsersSection();
         
-        buttonPanel.setSpacing(10);
-        buttonPanel.add(updateButton);
-        buttonPanel.add(cancelButton);
+    buttonPanel.setSpacing(10);
+    buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+    updateButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+    cancelButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+    buttonPanel.add(updateButton);
+    buttonPanel.add(cancelButton);
         
         panel.add(formTitle);
         panel.add(titleLabel);

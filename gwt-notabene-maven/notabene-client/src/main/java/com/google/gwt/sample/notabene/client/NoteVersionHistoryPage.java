@@ -167,7 +167,7 @@ public class NoteVersionHistoryPage {
         Label dateLabel = new Label(dateFormat.format(version.getVersionCreatedAt()));
         dateLabel.setStyleName("version-date");
 
-        Label editorLabel = new Label("da " + version.getEditorUsername());
+        Label editorLabel = new Label(version.getEditorUsername());
         editorLabel.setStyleName("version-editor");
 
         FlowPanel headerLeft = new FlowPanel();

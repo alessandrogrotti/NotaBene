@@ -16,6 +16,7 @@ public class NoteDetailPage {
     private Button backButton = new Button("Torna alla Lista");
     private Button deleteButton = new Button("Elimina Nota");
     private Button editButton = new Button("Modifica Nota");
+    private Button duplicateButton = new Button("Duplica");
     private Button versionHistoryButton = new Button("Cronologia Versioni");
     private HorizontalPanel buttonPanel = new HorizontalPanel();
     
@@ -44,11 +45,13 @@ public class NoteDetailPage {
         versionHistoryButton.setStyleName("version-history-button");
         deleteButton.setStyleName("delete-button");
         editButton.setStyleName("edit-button");
+        duplicateButton.setStyleName("duplicate-button");
         
         buttonPanel.setSpacing(10);
         buttonPanel.add(backButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(editButton);
+        buttonPanel.add(duplicateButton);
         buttonPanel.add(versionHistoryButton);
         
         panel.add(buttonPanel);
@@ -111,9 +114,11 @@ public class NoteDetailPage {
         
         boolean isOwner = currentUsername != null && currentUsername.equals(note.getOwnerUsername());
         boolean canWrite = currentUsername != null && note.canWrite(currentUsername);
+        boolean canRead = currentUsername != null && note.canRead(currentUsername);
 
         deleteButton.setVisible(isOwner);
         editButton.setVisible(canWrite);
+        duplicateButton.setVisible(canRead); // pulsante duplica visibile solo se l'utente ha i permessi in lettura
         versionHistoryButton.setVisible(note.hasVersionHistory());
         
         // mostra il contenuto 
@@ -163,5 +168,9 @@ public class NoteDetailPage {
 
     public Button getVersionHistoryButton() {
         return versionHistoryButton;
+    }
+
+    public Button getDuplicateButton() {
+        return duplicateButton;
     }
 }

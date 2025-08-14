@@ -123,6 +123,7 @@ public class NoteServiceImplTest {
         
         assertNotNull(service.getNoteById(readOnlyNote.getId(), "lettore"));
     }
+
     @Test
     void testDeleteNoteSuccess() {
         // Arrange - Crea una nota
@@ -277,6 +278,117 @@ public class NoteServiceImplTest {
         note.setId("nota_inesistente");
         boolean result = service.updateNote(note, "mario");
         assertFalse(result);
+    }
+    
+    @Test
+    void testDuplicateNoteSuccess() {
+        Note originalNote = new Note("Ricette dolci", "Tiramisu, panna cotta, crostata", "anna");
+        originalNote.addTag("cucina");
+        originalNote.addTag("dolci");
+        originalNote.setPermission(NotePermission.PRIVATE);
+        service.createNote(originalNote);
+        
+        // Duplica la nota
+        Note duplicatedNote = service.duplicateNote(originalNote.getId(), "anna");
+        
+        assertNotNull(duplicatedNote);
+        assertNotEquals(originalNote.getId(), duplicatedNote.getId()); 
+        assertEquals("Ricette dolci", duplicatedNote.getTitle()); 
+        assertEquals(originalNote.getContent(), duplicatedNote.getContent()); 
+        assertEquals("anna", duplicatedNote.getOwnerUsername()); 
+        assertEquals(originalNote.getTags(), duplicatedNote.getTags()); 
+        assertEquals(NotePermission.PRIVATE, duplicatedNote.getPermission()); 
+        assertEquals(0, duplicatedNote.getVersionNumber()); 
+        
+        // Verifica che ci siano ora 2 note per l'utente
+        List<Note> userNotes = service.getUserNotes("anna");
+        assertEquals(2, userNotes.size());
+    }
+    
+    @Test
+    void testDuplicateNoteByDifferentUser() {
+        Note originalNote = new Note("Ricette salate", "Pasta al pomodoro, risotto", "anna");
+        originalNote.setPermission(NotePermission.READ_ONLY);
+        originalNote.getReadOnlyUsers().add("luca"); 
+        service.createNote(originalNote);
+        
+        Note duplicatedNote = service.duplicateNote(originalNote.getId(), "luca");
+        
+        assertNotNull(duplicatedNote);
+        assertNotEquals(originalNote.getId(), duplicatedNote.getId());
+        assertEquals("Ricette salate", duplicatedNote.getTitle());
+        assertEquals(originalNote.getContent(), duplicatedNote.getContent());
+        assertEquals("luca", duplicatedNote.getOwnerUsername()); 
+        assertEquals(NotePermission.PRIVATE, duplicatedNote.getPermission()); 
+            
+        // Verifica che il primo utente abbia ancora la sua nota
+        List<Note> annaNotes = service.getUserNotes("anna");
+        assertEquals(1, annaNotes.size());
+        
+        // Verifica che il secondo utente abbia la sua copia
+        List<Note> lucaNotes = service.getUserNotes("luca");
+        assertEquals(1, lucaNotes.size());
+    }
+    
+    @Test
+    void testDuplicateSharedNote() {
+        Note originalNote = new Note("Appunti lavoro", "Meeting ore 15, deadline progetto", "luca");
+        originalNote.setPermission(NotePermission.READ_WRITE);
+        originalNote.getWriteUsers().add("anna");
+        service.createNote(originalNote);
+        
+        Note duplicatedNote = service.duplicateNote(originalNote.getId(), "anna");
+        
+        assertNotNull(duplicatedNote);
+        assertEquals("anna", duplicatedNote.getOwnerUsername()); 
+        assertEquals(NotePermission.PRIVATE, duplicatedNote.getPermission());
+        assertTrue(duplicatedNote.getReadOnlyUsers().isEmpty()); 
+        assertTrue(duplicatedNote.getWriteUsers().isEmpty());
+        
+        Note originalAfterDuplicate = service.getNoteById(originalNote.getId(), "luca");
+        assertEquals(NotePermission.READ_WRITE, originalAfterDuplicate.getPermission());
+        assertTrue(originalAfterDuplicate.getWriteUsers().contains("anna"));
+    }
+    
+    @Test
+    void testDuplicateNoteWithoutPermission() {
+        Note privateNote = new Note("Nota privata", "Contenuto segreto", "anna");
+        privateNote.setPermission(NotePermission.PRIVATE);
+        service.createNote(privateNote);
+        
+        // il secondo utente tenta di duplicare la nota privata del primo utente
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.duplicateNote(privateNote.getId(), "luca");
+        });
+        
+        assertEquals("Non hai i permessi per leggere questa nota", exception.getMessage());
+    }
+    
+    @Test
+    void testDuplicateNoteNotFound() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.duplicateNote("nota_inesistente", "anna");
+        });
+        
+        assertEquals("Nota non trovata", exception.getMessage());
+    }
+    
+    @Test
+    void testDuplicateNoteWithNullParameters() {
+        IllegalArgumentException exception1 = assertThrows(IllegalArgumentException.class, () -> {
+            service.duplicateNote(null, "anna");
+        });
+        assertEquals("ID della nota e username sono obbligatori", exception1.getMessage());
+        
+        IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class, () -> {
+            service.duplicateNote("validId", null);
+        });
+        assertEquals("ID della nota e username sono obbligatori", exception2.getMessage());
+        
+        IllegalArgumentException exception3 = assertThrows(IllegalArgumentException.class, () -> {
+            service.duplicateNote("", "anna");
+        });
+        assertEquals("ID della nota e username sono obbligatori", exception3.getMessage());
     }
 
   

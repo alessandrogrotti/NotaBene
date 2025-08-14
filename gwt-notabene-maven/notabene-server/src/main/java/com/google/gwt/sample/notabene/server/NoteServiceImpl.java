@@ -2,9 +2,11 @@ package com.google.gwt.sample.notabene.server;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.HashSet;
 import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
 import com.google.gwt.sample.notabene.shared.NoteVersion;
+import com.google.gwt.sample.notabene.shared.NotePermission;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class NoteServiceImpl extends RemoteServiceServlet implements NoteService {
@@ -207,5 +209,54 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
         }
     }
     
+    @Override
+    public Note duplicateNote(String noteId, String username) throws IllegalArgumentException {
+        if (noteId == null || noteId.trim().isEmpty() || 
+            username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("ID della nota e username sono obbligatori");
+        }
+        
+        try {
+            Note originalNote = noteRepository.getNote(noteId);
+            
+            if (originalNote == null) {
+                throw new IllegalArgumentException("Nota non trovata");
+            }
+            
+            if (!originalNote.canRead(username)) {
+                throw new IllegalArgumentException("Non hai i permessi per leggere questa nota");
+            }
+            
+            Note duplicatedNote = new Note();
+            duplicatedNote.setTitle(originalNote.getTitle());
+            duplicatedNote.setContent(originalNote.getContent());
+            duplicatedNote.setOwnerUsername(username); // la copia ha come autore l'utente che la duplica
+            duplicatedNote.setTags(new HashSet<>(originalNote.getTags())); 
+            duplicatedNote.setPermission(NotePermission.PRIVATE); // copia privata di default
+            
+            // Nuovo ID unico per la copia
+            duplicatedNote.setId(username + "_" + System.currentTimeMillis() + Math.random());
+            duplicatedNote.setVersionNumber(0);
+            
+            boolean result = noteRepository.saveNote(duplicatedNote);
+            
+            if (result) {
+                System.out.println("Nota duplicata con successo. ID originale: " + noteId + 
+                                 ", ID copia: " + duplicatedNote.getId() + 
+                                 ", Utente: " + username);
+                noteRepository.printAllNotes(); // Per debug
+                return duplicatedNote;
+            } else {
+                throw new IllegalArgumentException("Errore durante il salvataggio della nota duplicata");
+            }
+            
+        } catch (IllegalArgumentException e) {
+            throw e; 
+        } catch (Exception e) {
+            System.err.println("Errore durante la duplicazione della nota: " + e.getMessage());
+            e.printStackTrace();
+            throw new IllegalArgumentException("Errore durante la duplicazione della nota: " + e.getMessage());
+        }
+    }
    
 }

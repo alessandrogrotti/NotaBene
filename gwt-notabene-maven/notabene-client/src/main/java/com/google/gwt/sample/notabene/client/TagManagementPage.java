@@ -20,7 +20,7 @@ public class TagManagementPage {
     
     private VerticalPanel mainPanel = new VerticalPanel();
     private Label titleLabel = new Label("Gestione Tag");
-    private Button backButton = new Button("Torna alla Home");
+    private Button backButton = new Button("Torna alla Lista");
     private Button addTagButton = new Button("Aggiungi Tag");
     
     // Form per aggiungere un nuovo tag
@@ -46,6 +46,7 @@ public class TagManagementPage {
         mainPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         mainPanel.setSpacing(20);
         mainPanel.setWidth("100%");
+        mainPanel.setStyleName("form-container"); 
         
         // Titolo
         titleLabel.setStyleName("form-title");
@@ -94,8 +95,11 @@ public class TagManagementPage {
         // Pulsanti del form
         saveTagButton.setStyleName("form-button");
         cancelButton.setStyleName("back-button");
-        addTagForm.add(saveTagButton);
-        addTagForm.add(cancelButton);
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(10);
+        buttonPanel.add(saveTagButton);
+        buttonPanel.add(cancelButton);
+        addTagForm.add(buttonPanel);
         
         mainPanel.add(addTagForm);
     }

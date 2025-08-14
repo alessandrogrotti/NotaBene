@@ -245,7 +245,7 @@ public class NoteSearchPanel extends Composite {
     private void toggleAdvancedFilters() {
         filtersVisible = !filtersVisible;
         advancedFiltersPanel.setVisible(filtersVisible);
-        toggleFiltersButton.setText(filtersVisible ? "⚙️ Nascondi Filtri" : "Filtri Avanzati");
+        toggleFiltersButton.setText(filtersVisible ? "Nascondi Filtri" : "Filtri Avanzati");
     }
     
     private void performSearch() {

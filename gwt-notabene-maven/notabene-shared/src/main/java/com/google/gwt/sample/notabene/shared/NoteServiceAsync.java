@@ -17,4 +17,6 @@ public interface NoteServiceAsync {
     void updateNote(Note note, String username, AsyncCallback<Boolean> callback);
     
     void deleteNote(String noteId, String username, AsyncCallback<Boolean> callback);
+    
+    void duplicateNote(String noteId, String username, AsyncCallback<Note> callback);
 }

@@ -127,6 +127,36 @@ public class NotaBene implements EntryPoint {
         });
     }
     
+    private void handleDuplicateNote(Note note) {
+        if (currentUser == null || note == null) {
+            return;
+        }
+        
+        boolean confirm = Window.confirm("Vuoi creare una copia della nota '" + note.getTitle() + "'?");
+        
+        if (!confirm) {
+            return;
+        }
+        
+        // chiamata al servizio per duplicare la nota
+        noteService.duplicateNote(note.getId(), currentUser.getUsername(), new AsyncCallback<Note>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert("Errore durante la duplicazione della nota: " + caught.getMessage());
+            }
+            
+            @Override
+            public void onSuccess(Note duplicatedNote) {
+                if (duplicatedNote != null) {
+                    Window.alert("Nota duplicata con successo!");
+                    showHomePage();
+                } else {
+                    Window.alert("Impossibile duplicare la nota. Verifica di avere i permessi necessari.");
+                }
+            }
+        });
+    }
+    
     private void handleRegistration() {
         String username = registrationForm.getUsernameBox().getText().trim();
         String password = registrationForm.getPasswordBox().getText();
@@ -495,6 +525,17 @@ public class NotaBene implements EntryPoint {
             @Override
             public void onClick(ClickEvent event) {
                 showVersionHistory(noteDetailPage.getCurrentNote());
+            }
+        });
+        
+        // handler per il pulsante "Duplica" nella pagina di dettaglio
+        noteDetailPage.getDuplicateButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                Note note = noteDetailPage.getCurrentNote();
+                if (note != null && currentUser != null) {
+                    handleDuplicateNote(note);
+                }
             }
         });
         

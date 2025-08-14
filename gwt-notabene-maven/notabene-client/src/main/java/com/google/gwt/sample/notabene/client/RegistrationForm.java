@@ -6,6 +6,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class RegistrationForm {
     private VerticalPanel panel = new VerticalPanel();
@@ -25,6 +26,7 @@ public class RegistrationForm {
         panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         panel.setSpacing(15);
         panel.setWidth("100%");
+        panel.setStyleName("form-container"); 
         registerTitle.setStyleName("form-title");
         usernameLabel.setStyleName("form-label");
         passwordLabel.setStyleName("form-label");
@@ -35,7 +37,7 @@ public class RegistrationForm {
         nameBox.setStyleName("form-input");
         surnameBox.setStyleName("form-input");
         confirmButton.setStyleName("form-button");
-        backButton.setStyleName("back-button");
+    backButton.setStyleName("back-button form-cancel-lower");
         panel.add(registerTitle);
         panel.add(usernameLabel);
         panel.add(usernameBox);
@@ -45,8 +47,11 @@ public class RegistrationForm {
         panel.add(nameBox);
         panel.add(surnameLabel);
         panel.add(surnameBox);
-        panel.add(confirmButton);
-        panel.add(backButton);
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(10);
+        buttonPanel.add(confirmButton);
+        buttonPanel.add(backButton);
+        panel.add(buttonPanel);
     }
 
     public void show() {

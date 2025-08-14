@@ -114,7 +114,7 @@ public class CreateNoteForm {
         permissionBox.setWidth("400px");
         
         createButton.setStyleName("form-button");
-        cancelButton.setStyleName("back-button");
+    cancelButton.setStyleName("back-button form-cancel-lower");
         
         // listbox permessi
         permissionBox.addItem(NotePermission.PRIVATE.getDisplayName(), NotePermission.PRIVATE.name());
@@ -129,9 +129,12 @@ public class CreateNoteForm {
         setupTagsSection();
         setupUsersSection();
         
-        buttonPanel.setSpacing(10);
-        buttonPanel.add(createButton);
-        buttonPanel.add(cancelButton);
+    buttonPanel.setSpacing(10);
+    buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+    createButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+    cancelButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+    buttonPanel.add(createButton);
+    buttonPanel.add(cancelButton);
   
         panel.add(formTitle);
         panel.add(titleLabel);

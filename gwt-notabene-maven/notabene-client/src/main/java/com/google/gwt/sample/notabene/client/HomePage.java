@@ -9,22 +9,26 @@ import com.google.gwt.sample.notabene.shared.User;
 import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
 import com.google.gwt.sample.notabene.shared.NoteServiceAsync;
+import com.google.gwt.sample.notabene.shared.NoteFilter;
+import com.google.gwt.sample.notabene.client.utils.NoteFilterUtils;
 import java.util.List;
 
 
 public class HomePage {
     private final NoteServiceAsync noteService = GWT.create(NoteService.class);
 
-   private VerticalPanel panel = new VerticalPanel();
+    private VerticalPanel panel = new VerticalPanel();
     private Label welcomeLabel = new Label("Benvenuto nella nostra applicazione!");
     private Button registerButton = new Button("Registrati");
     private Button loginButton = new Button("Accedi");
     private Button addNoteButton = new Button("Aggiungi nota");
     private Button manageTagsButton = new Button("Gestisci Tag");
     private Button logoutButton = new Button("Logout");
-    private VerticalPanel notesPanel = new VerticalPanel(); //per dopo
-    private VerticalPanel notesListPanel = new VerticalPanel(); //per dopo
-    private String currentUsername; //teniamo traccia dell'utente corrente
+    private VerticalPanel notesPanel = new VerticalPanel();
+    private VerticalPanel notesListPanel = new VerticalPanel();
+    private NoteSearchPanel searchPanel;
+    private List<Note> allNotes;
+    private String currentUsername;
 
     public HomePage() {
         panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
@@ -36,6 +40,9 @@ public class HomePage {
         addNoteButton.setStyleName("home-button");
         manageTagsButton.setStyleName("home-button");
         logoutButton.setStyleName("back-button");
+        
+        searchPanel = new NoteSearchPanel();
+        setupSearchHandler();
         
         panel.add(welcomeLabel);
         panel.add(registerButton);
@@ -62,6 +69,8 @@ public class HomePage {
             panel.add(addNoteButton);
             panel.add(manageTagsButton);
             panel.add(logoutButton);
+
+            panel.add(searchPanel);
 
             loadUserNotes(user.getUsername());
 
@@ -104,6 +113,7 @@ public class HomePage {
                                 userNotes.add(accessibleNote);
                             }
                         }
+                        allNotes = userNotes;
                         displayNotes(userNotes);
                     }
                 });
@@ -144,11 +154,9 @@ public class HomePage {
     noteItem.setWidth("100%"); 
     noteItem.setSpacing(8);
         
-        // Titolo della nota (cliccabile)
         Label titleLabel = new Label(note.getTitle());
         titleLabel.setStyleName("note-item-title");
         
-        // anteprima del contenuto
         String preview = note.getContent();
         if (preview != null) {
             if (preview.length() > 150) {
@@ -160,7 +168,6 @@ public class HomePage {
         Label previewLabel = new Label(preview);
         previewLabel.setStyleName("note-item-preview");
         
-        // Info autore e data
         String authorInfo = "Autore: " + note.getOwnerUsername();
         if (note.getCreatedAt() != null) {
             authorInfo += " • " + com.google.gwt.i18n.client.DateTimeFormat.getFormat("dd/MM/yyyy HH:mm").format(note.getCreatedAt());
@@ -172,7 +179,6 @@ public class HomePage {
         noteItem.add(previewLabel);
         noteItem.add(authorLabel);
         
-        // Tag se presenti
         if (note.getTags() != null && !note.getTags().isEmpty()) {
             HorizontalPanel tagsPanel = new HorizontalPanel();
             tagsPanel.setSpacing(5);
@@ -188,7 +194,6 @@ public class HomePage {
             noteItem.add(tagsPanel);
         }
         
-        // handler per click su parte principale della nota
         titleLabel.addDomHandler(event -> {
             if (onNoteClickHandler != null) {
                 onNoteClickHandler.onNoteClick(note);
@@ -204,7 +209,6 @@ public class HomePage {
         container.add(noteItem);
     }
     
-    // interface per gestire i click sulle note
     public interface NoteClickHandler {
         void onNoteClick(Note note);
     }
@@ -212,6 +216,63 @@ public class HomePage {
     
     public void setNoteClickHandler(NoteClickHandler handler) {
         this.onNoteClickHandler = handler;
+    }
+    
+    private void setupSearchHandler() {
+        if (searchPanel != null) {
+            searchPanel.setSearchHandler(new NoteSearchPanel.SearchHandler() {
+                @Override
+                public void onSearch(NoteFilter filter) {
+                    performSearch(filter);
+                }
+            });
+        }
+    }
+
+    private void performSearch(NoteFilter filter) {
+        if (allNotes == null) {
+            return;
+        }
+        List<Note> filteredNotes;
+        if (filter.isEmpty()) {
+            filteredNotes = allNotes;
+        } else {
+            filteredNotes = NoteFilterUtils.filterNotes(allNotes, filter);
+            filteredNotes = NoteFilterUtils.sortByRelevance(filteredNotes, filter);
+        }
+        displayNotes(filteredNotes);
+        if (filteredNotes.isEmpty() && !filter.isEmpty()) {
+            showNoResultsMessage();
+        }
+    }
+
+    private void showNoResultsMessage() {
+        notesPanel.clear();
+        
+        VerticalPanel noResultsPanel = new VerticalPanel();
+        noResultsPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+        noResultsPanel.setSpacing(15);
+        noResultsPanel.setStyleName("no-results-panel");
+        
+        Label noResultsLabel = new Label("🔍 Nessuna nota trovata");
+        noResultsLabel.setStyleName("no-results-title");
+        
+        Label suggestionLabel = new Label("Prova a modificare i criteri di ricerca");
+        suggestionLabel.setStyleName("no-results-text");
+        
+        Button clearFiltersButton = new Button("Cancella Filtri");
+        clearFiltersButton.setStyleName("clear-filters-button");
+        clearFiltersButton.addClickHandler(event -> {
+            if (searchPanel != null) {
+                searchPanel.clearAllFilters();
+            }
+        });
+        
+        noResultsPanel.add(noResultsLabel);
+        noResultsPanel.add(suggestionLabel);
+        noResultsPanel.add(clearFiltersButton);
+        
+        notesPanel.add(noResultsPanel);
     }
     
 

@@ -2,6 +2,46 @@
   margin-top: 18px !important;
 }
 
+.lock-status-label {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.lock-status-owned {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.lock-status-blocked {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.form-button-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.form-button-secondary:hover {
+    background-color: #5a6268;
+}
+
+.form-button-secondary:disabled {
+    background-color: #6c757d;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 body {
     padding: 10px;
     font-family: Arial, sans-serif;
@@ -52,7 +92,6 @@ body {
   color: red;
 }
 
-/* Stili per la homepage */
 .welcome-message {
   font-size: 24px;
   font-weight: bold;
@@ -76,7 +115,6 @@ body {
   background-color: #1a4d99;
 }
 
-/* Stili per i form */
 .form-title {
   font-size: 22px;
   font-weight: bold;
@@ -798,7 +836,6 @@ body {
   text-transform: uppercase;
 }
 
-/* Classi di utilità per il versionamento */
 .version-badge {
   display: inline-flex;
   align-items: center;

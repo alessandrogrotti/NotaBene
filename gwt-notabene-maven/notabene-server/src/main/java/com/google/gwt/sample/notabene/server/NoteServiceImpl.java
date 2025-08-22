@@ -7,21 +7,24 @@ import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
 import com.google.gwt.sample.notabene.shared.NoteVersion;
 import com.google.gwt.sample.notabene.shared.NotePermission;
+import com.google.gwt.sample.notabene.shared.NoteLock;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class NoteServiceImpl extends RemoteServiceServlet implements NoteService {
     
     private static final long serialVersionUID = 1L;
     private NoteRepository noteRepository;
+    private NoteLockManager lockManager;
     
     public NoteServiceImpl() {
         noteRepository = NoteRepository.getInstance();
-        System.out.println("NoteServiceImpl inizializzato");
+        lockManager = NoteLockManager.getInstance();
+        System.out.println("NoteServiceImpl inizializzato con gestione lock");
     }
     
     @Override
     public boolean createNote(Note note) throws IllegalArgumentException {
-        // Validazione dei dati di input
+        
         if (note == null) {
             throw new IllegalArgumentException("La nota non può essere null");
         }
@@ -60,7 +63,7 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
             
             if (result) {
                 System.out.println("Nota creata con successo per l'utente: " + note.getOwnerUsername());
-                noteRepository.printAllNotes(); // Per debug
+                noteRepository.printAllNotes();
             }
             
             return result;
@@ -135,6 +138,14 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
             if (existingNote == null || !existingNote.canWrite(username)) {
                 return false;
             }
+            
+            
+            NoteLock lock = lockManager.checkLock(note.getId());
+            if (lock != null && !lock.isOwnedBy(username)) {
+                System.out.println("Tentativo di aggiornamento nota " + note.getId() + 
+                                 " da parte di " + username + " - bloccata da " + lock.getLockedByUser());
+                return false;
+            }
 
             if (!existingNote.getContent().equals(note.getContent()) || 
                 !existingNote.getTitle().equals(note.getTitle()) ||
@@ -164,7 +175,15 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
                     note.setVersions(new LinkedList<>(existingNote.getVersions()));
                 }
                 
-                return noteRepository.saveNote(existingNote);
+                boolean result = noteRepository.saveNote(existingNote);
+                
+                
+                if (result) {
+                    lockManager.releaseLock(note.getId(), username);
+                    System.out.println("Lock rilasciato automaticamente dopo aggiornamento nota " + note.getId());
+                }
+                
+                return result;
             } else {
                 existingNote.setPermission(note.getPermission());
                 existingNote.setReadOnlyUsers(note.getReadOnlyUsers());
@@ -178,7 +197,15 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
                     note.setVersions(new LinkedList<>(existingNote.getVersions()));
                 }
                 
-                return noteRepository.saveNote(existingNote);
+                boolean result = noteRepository.saveNote(existingNote);
+                
+                
+                if (result) {
+                    lockManager.releaseLock(note.getId(), username);
+                    System.out.println("Lock rilasciato automaticamente dopo aggiornamento permessi nota " + note.getId());
+                }
+                
+                return result;
             }
         } catch (Exception e) {
             System.err.println("Errore durante l'aggiornamento della nota: " + e.getMessage());
@@ -230,11 +257,11 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
             Note duplicatedNote = new Note();
             duplicatedNote.setTitle(originalNote.getTitle());
             duplicatedNote.setContent(originalNote.getContent());
-            duplicatedNote.setOwnerUsername(username); // la copia ha come autore l'utente che la duplica
+            duplicatedNote.setOwnerUsername(username); 
             duplicatedNote.setTags(new HashSet<>(originalNote.getTags())); 
-            duplicatedNote.setPermission(NotePermission.PRIVATE); // copia privata di default
+            duplicatedNote.setPermission(NotePermission.PRIVATE); 
             
-            // Nuovo ID unico per la copia
+            
             duplicatedNote.setId(username + "_" + System.currentTimeMillis() + Math.random());
             duplicatedNote.setVersionNumber(0);
             
@@ -244,7 +271,7 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
                 System.out.println("Nota duplicata con successo. ID originale: " + noteId + 
                                  ", ID copia: " + duplicatedNote.getId() + 
                                  ", Utente: " + username);
-                noteRepository.printAllNotes(); // Per debug
+                noteRepository.printAllNotes(); 
                 return duplicatedNote;
             } else {
                 throw new IllegalArgumentException("Errore durante il salvataggio della nota duplicata");

@@ -11,6 +11,10 @@ import com.google.gwt.sample.notabene.shared.TagServiceAsync;
 import com.google.gwt.sample.notabene.shared.User;
 import com.google.gwt.sample.notabene.shared.UserService;
 import com.google.gwt.sample.notabene.shared.UserServiceAsync;
+import com.google.gwt.sample.notabene.shared.NoteLock;
+import com.google.gwt.sample.notabene.shared.NoteLockService;
+import com.google.gwt.sample.notabene.shared.NoteLockServiceAsync;
+import com.google.gwt.user.client.Timer;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,9 +23,11 @@ import java.util.Set;
 public class EditNoteForm {
     private final TagServiceAsync tagService = GWT.create(TagService.class);
     private final UserServiceAsync userService = GWT.create(UserService.class);
+    private final NoteLockServiceAsync lockService = GWT.create(NoteLockService.class);
     
     private VerticalPanel panel = new VerticalPanel();
     private Label formTitle = new Label("Modifica nota");
+    private Label lockStatusLabel = new Label();
     private Label titleLabel = new Label("Titolo:");
     private TextBox titleBox = new TextBox();
     private Label contentLabel = new Label("Contenuto:");
@@ -47,14 +53,23 @@ public class EditNoteForm {
     private HorizontalPanel buttonPanel = new HorizontalPanel();
     private Button updateButton = new Button("Aggiorna Nota");
     private Button cancelButton = new Button("Annulla");
+    private Button releaseLockButton = new Button("Rilascia Blocco");
     private List<Tag> availableTags = new ArrayList<>();
     private List<User> availableUsers = new ArrayList<>();
     private Note currentNote;
-    private boolean isCurrentUserAuthor = false; // Flag per controllare se l'utente corrente è l'autore
+    private boolean isCurrentUserAuthor = false;
+    
+    private NoteLock currentLock = null;
+    private String currentUsername = null;
+    private Timer countdownTimer = null;
+    private Timer ownLockCheckTimer = null;
+    private boolean lockAcquired = false;
+    private boolean releaseLockHandlerAdded = false;
 
     public EditNoteForm() {
         setupForm();
         loadAvailableData();
+        setupReleaseLockHandler();
     }
 
     private void setupForm() {
@@ -63,6 +78,7 @@ public class EditNoteForm {
     panel.setWidth("80%");
     panel.setStyleName("form-container"); 
         formTitle.setStyleName("form-title");
+        lockStatusLabel.setStyleName("lock-status-label");
         titleLabel.setStyleName("form-label");
         contentLabel.setStyleName("form-label");
         tagsLabel.setStyleName("form-label");
@@ -78,7 +94,8 @@ public class EditNoteForm {
         permissionBox.setStyleName("form-input");
         permissionBox.setWidth("400px");
         updateButton.setStyleName("form-button");
-    cancelButton.setStyleName("back-button form-cancel-lower");
+        cancelButton.setStyleName("back-button form-cancel-lower");
+        releaseLockButton.setStyleName("form-button-secondary");
         
         permissionBox.addItem(NotePermission.PRIVATE.getDisplayName(), NotePermission.PRIVATE.name());
         permissionBox.addItem(NotePermission.READ_ONLY.getDisplayName(), NotePermission.READ_ONLY.name());
@@ -91,14 +108,17 @@ public class EditNoteForm {
         setupTagsSection();
         setupUsersSection();
         
-    buttonPanel.setSpacing(10);
-    buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-    updateButton.getElement().getStyle().setProperty("verticalAlign", "middle");
-    cancelButton.getElement().getStyle().setProperty("verticalAlign", "middle");
-    buttonPanel.add(updateButton);
-    buttonPanel.add(cancelButton);
+        buttonPanel.setSpacing(10);
+        buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        updateButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+        cancelButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+        releaseLockButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+        buttonPanel.add(updateButton);
+        buttonPanel.add(releaseLockButton);
+        buttonPanel.add(cancelButton);
         
         panel.add(formTitle);
+        panel.add(lockStatusLabel);
         panel.add(titleLabel);
         panel.add(titleBox);
         panel.add(contentLabel);
@@ -111,6 +131,8 @@ public class EditNoteForm {
         panel.add(buttonPanel);
         
         usersSection.setVisible(false);
+        lockStatusLabel.setVisible(false);
+        releaseLockButton.setVisible(false);
     }
     
     private void setupTagsSection() {
@@ -143,6 +165,20 @@ public class EditNoteForm {
         usersSection.add(selectedWriteUsersFlow);
         usersSection.add(new Label("Utenti disponibili:"));
         usersSection.add(availableUsersFlow);
+    }
+
+    private void setupReleaseLockHandler() {
+        if (!releaseLockHandlerAdded) {
+            releaseLockButton.addClickHandler(event -> {
+                if (currentNote != null && currentUsername != null && lockAcquired) {
+                    releaseLock(currentNote.getId(), currentUsername, () -> {
+                        updateLockStatus("Blocco rilasciato", false);
+                        disableEditingInterface();
+                    });
+                }
+            });
+            releaseLockHandlerAdded = true;
+        }
     }
     
     private void loadAvailableData() {
@@ -212,7 +248,18 @@ public class EditNoteForm {
         updatePermissionSectionVisibility();
     }
     
-    // imposta se l'utente corrente è l'autore della nota
+    public void loadNoteWithLock(Note note, String username) {
+        this.currentNote = note;
+        this.currentUsername = username;
+        
+        checkExistingLock(note.getId(), () -> {
+            acquireLock(note.getId(), username, () -> {
+                loadNote(note);
+                enableEditingInterface();
+            });
+        });
+    }
+    
     public void setCurrentUserAuthor(boolean isAuthor) {
         this.isCurrentUserAuthor = isAuthor;
         updatePermissionSectionVisibility();
@@ -416,6 +463,10 @@ public class EditNoteForm {
     }
 
     public void clearForm() {
+        if (currentLock != null && currentUsername != null && currentNote != null) {
+            releaseLock(currentNote.getId(), currentUsername, null);
+        }
+        
         titleBox.setText("");
         contentArea.setText("");
         selectedTags.clear();
@@ -424,6 +475,8 @@ public class EditNoteForm {
         permissionBox.setSelectedIndex(0);
         currentNote = null;
         isCurrentUserAuthor = false;
+        
+        resetLockState();
         updateTagsDisplay();
         updateSelectedTagsDisplay();
         updateSelectedUsersDisplay();
@@ -431,8 +484,229 @@ public class EditNoteForm {
         updatePermissionSectionVisibility();
     }
     
+    private String formatTimeRemaining(long timeMs) {
+        if (timeMs <= 0) {
+            return "00:00:00:00";
+        }
+        
+        long totalSeconds = timeMs / 1000;
+        
+        long days = totalSeconds / (24 * 60 * 60);
+        long hours = (totalSeconds % (24 * 60 * 60)) / (60 * 60);
+        long minutes = (totalSeconds % (60 * 60)) / 60;
+        long seconds = totalSeconds % 60;
+        
+        String dayStr = days < 10 ? "0" + days : String.valueOf(days);
+        String hourStr = hours < 10 ? "0" + hours : String.valueOf(hours);
+        String minStr = minutes < 10 ? "0" + minutes : String.valueOf(minutes);
+        String secStr = seconds < 10 ? "0" + seconds : String.valueOf(seconds);
+        
+        return dayStr + ":" + hourStr + ":" + minStr + ":" + secStr;
+    }
+    
+    private void startCountdownTimer() {
+        if (countdownTimer != null) {
+            countdownTimer.cancel();
+        }
+        
+        countdownTimer = new Timer() {
+            @Override
+            public void run() {
+                if (currentLock != null && !lockAcquired) {
+                    long remainingTime = currentLock.getRemainingTime();
+                    if (remainingTime > 0) {
+                        String formattedTime = formatTimeRemaining(remainingTime);
+                        updateLockStatus("Nota in modifica da: " + currentLock.getLockedByUser() + 
+                                        " (tempo rimanente: " + formattedTime + ")", false);
+                    } else {
+                        if (currentNote != null) {
+                            checkExistingLock(currentNote.getId(), () -> {
+                                enableEditingInterface();
+                                updateLockStatus("Blocco scaduto - Modifica ora disponibile", true);
+                            });
+                        }
+                    }
+                } else {
+                    if (countdownTimer != null) {
+                        countdownTimer.cancel();
+                        countdownTimer = null;
+                    }
+                }
+            }
+        };
+        
+        countdownTimer.scheduleRepeating(1000);
+    }
+    
+    private void startOwnLockCheckTimer() {
+        if (ownLockCheckTimer != null) {
+            ownLockCheckTimer.cancel();
+        }
+        
+        ownLockCheckTimer = new Timer() {
+            @Override
+            public void run() {
+                if (currentNote != null && currentUsername != null && lockAcquired) {
+                    checkOwnLockValidity();
+                }
+            }
+        };
+        
+        ownLockCheckTimer.scheduleRepeating(30 * 1000);
+    }
+    
+    private void checkOwnLockValidity() {
+        if (currentNote == null || currentUsername == null) return;
+        
+        lockService.checkLock(currentNote.getId(), new AsyncCallback<NoteLock>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                
+            }
+            
+            @Override
+            public void onSuccess(NoteLock lock) {
+                if (lock == null || !lock.isOwnedBy(currentUsername)) {
+                    lockAcquired = false;
+                    currentLock = null;
+                    updateLockStatus("Il tuo blocco è scaduto. Modifica non più disponibile.", false);
+                    disableEditingInterface();
+                    
+                    if (ownLockCheckTimer != null) {
+                        ownLockCheckTimer.cancel();
+                        ownLockCheckTimer = null;
+                    }
+                }
+            }
+        });
+    }
+    
+    private void checkExistingLock(String noteId, Runnable onNoLock) {
+        lockService.checkLock(noteId, new AsyncCallback<NoteLock>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                updateLockStatus("Errore nel controllo del blocco: " + caught.getMessage(), false);
+                disableEditingInterface();
+            }
+            
+            @Override
+            public void onSuccess(NoteLock lock) {
+                if (lock != null) {
+                    if (lock.isOwnedBy(currentUsername)) {
+                        currentLock = lock;
+                        lockAcquired = true;
+                        updateLockStatus("Nota bloccata per modifica", true);
+                        startOwnLockCheckTimer();
+                        onNoLock.run();
+                    } else {
+                        currentLock = lock;
+                        lockAcquired = false;
+                        long remainingTime = lock.getRemainingTime();
+                        String formattedTime = formatTimeRemaining(remainingTime);
+                        updateLockStatus("Nota in modifica da: " + lock.getLockedByUser() + 
+                                        " (tempo rimanente: " + formattedTime + ")", false);
+                        disableEditingInterface();
+                        startCountdownTimer();
+                    }
+                } else {
+                    onNoLock.run();
+                }
+            }
+        });
+    }
+    
+    private void acquireLock(String noteId, String username, Runnable onSuccess) {
+        lockService.acquireLock(noteId, username, new AsyncCallback<NoteLock>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                updateLockStatus("Impossibile acquisire il blocco: " + caught.getMessage(), false);
+                disableEditingInterface();
+            }
+            
+            @Override
+            public void onSuccess(NoteLock lock) {
+                if (lock != null) {
+                    currentLock = lock;
+                    lockAcquired = true;
+                    updateLockStatus("Nota bloccata per modifica", true);
+                    startOwnLockCheckTimer();
+                    onSuccess.run();
+                } else {
+                    updateLockStatus("Impossibile acquisire il blocco", false);
+                    disableEditingInterface();
+                }
+            }
+        });
+    }
+    
+    private void releaseLock(String noteId, String username, Runnable onSuccess) {
+        if (noteId == null || username == null) {
+            resetLockState();
+            if (onSuccess != null) onSuccess.run();
+            return;
+        }
+        
+        lockService.releaseLock(noteId, username, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                resetLockState();
+                if (onSuccess != null) onSuccess.run();
+            }
+            
+            @Override
+            public void onSuccess(Boolean result) {
+                resetLockState();
+                if (onSuccess != null) onSuccess.run();
+            }
+        });
+    }
+    
+    private void enableEditingInterface() {
+        titleBox.setEnabled(true);
+        contentArea.setEnabled(true);
+        updateButton.setEnabled(true);
+        releaseLockButton.setVisible(true);
+        permissionBox.setEnabled(isCurrentUserAuthor);
+    }
+    
+    private void disableEditingInterface() {
+        titleBox.setEnabled(false);
+        contentArea.setEnabled(false);
+        updateButton.setEnabled(false);
+        releaseLockButton.setVisible(false);
+        permissionBox.setEnabled(false);
+    }
+    
+    private void updateLockStatus(String message, boolean isOwned) {
+        lockStatusLabel.setText(message);
+        lockStatusLabel.setVisible(true);
+        
+        if (isOwned) {
+            lockStatusLabel.setStyleName("lock-status-owned");
+        } else {
+            lockStatusLabel.setStyleName("lock-status-blocked");
+        }
+    }
+    
+    private void resetLockState() {
+        currentLock = null;
+        lockAcquired = false;
+        lockStatusLabel.setVisible(false);
+        
+        if (countdownTimer != null) {
+            countdownTimer.cancel();
+            countdownTimer = null;
+        }
+        
+        if (ownLockCheckTimer != null) {
+            ownLockCheckTimer.cancel();
+            ownLockCheckTimer = null;
+        }
+    }
+    
     public Button getUpdateButton() { return updateButton; }
     public Button getCancelButton() { return cancelButton; }
+    public Button getReleaseLockButton() { return releaseLockButton; }
     public TextBox getTitleBox() { return titleBox; }
     public TextArea getContentArea() { return contentArea; }
     public ListBox getPermissionBox() { return permissionBox; }

@@ -43,6 +43,17 @@
     <url-pattern>/app/noteService</url-pattern>
   </servlet-mapping>
 
+  <!-- Note Lock Service Servlet -->
+  <servlet>
+    <servlet-name>noteLockService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.NoteLockServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>noteLockService</servlet-name>
+    <url-pattern>/app/noteLockService</url-pattern>
+  </servlet-mapping>
+
   <!-- Note Version Service Servlet -->
   <servlet>
     <servlet-name>noteVersionService</servlet-name>

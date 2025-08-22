@@ -36,7 +36,7 @@ public class NotaBene implements EntryPoint {
     private NoteVersionHistoryPage versionHistoryPage;
     private final TagServiceAsync tagService = GWT.create(TagService.class);
  
-    //ENTRY POINT HOME PAGE BASIC
+    
     public void onModuleLoad() {
         homePage = new HomePage();
         registrationForm = new RegistrationForm();
@@ -80,11 +80,16 @@ public class NotaBene implements EntryPoint {
         if (editNoteForm == null) {
             editNoteForm = new EditNoteForm();
         }
-        editNoteForm.loadNote(note);
         
-        // Controlla se l'utente corrente è l'autore della nota
+        
         boolean isAuthor = currentUser != null && currentUser.getUsername().equals(note.getOwnerUsername());
         editNoteForm.setCurrentUserAuthor(isAuthor);
+        
+        if (currentUser != null) {
+            editNoteForm.loadNoteWithLock(note, currentUser.getUsername());
+        } else {
+            editNoteForm.loadNote(note);
+        }
         
         editNoteForm.show();
     }
@@ -101,14 +106,14 @@ public class NotaBene implements EntryPoint {
             return;
         }
 
-        // conferma eliminazione
+        
         boolean confirm = Window.confirm("Sei sicuro di voler eliminare la nota '" + note.getTitle() + "'?\nQuesta operazione non può essere annullata.");
         
         if (!confirm) {
             return;
         }
         
-        // call a servizio per eliminare la nota
+        
         noteService.deleteNote(note.getId(), currentUser.getUsername(), new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -138,7 +143,7 @@ public class NotaBene implements EntryPoint {
             return;
         }
         
-        // chiamata al servizio per duplicare la nota
+        
         noteService.duplicateNote(note.getId(), currentUser.getUsername(), new AsyncCallback<Note>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -200,7 +205,7 @@ public class NotaBene implements EntryPoint {
         String title = createNoteForm.getTitleBox().getText().trim();
         String content = createNoteForm.getContentArea().getText().trim();
         String permissionValue = createNoteForm.getPermissionBox().getSelectedValue();
-        //controlli lato client
+        
         if (title.isEmpty() || content.isEmpty()) {
             Window.alert("Titolo e contenuto sono obbligatori!");
             return;
@@ -212,7 +217,7 @@ public class NotaBene implements EntryPoint {
         }
 
         Note note = new Note(title, content, currentUser.getUsername());
-        //impostazione dei permessi
+        
         try {
             NotePermission permission = NotePermission.valueOf(permissionValue);
             note.setPermission(permission);
@@ -236,12 +241,12 @@ public class NotaBene implements EntryPoint {
             }
         }
         
-        // disabilito il pulsante per evitare doppi invii
+        
         Button createButton = createNoteForm.getCreateButton();
         createButton.setEnabled(false);
         createButton.setText("Creazione in corso...");
         
-        // chiama il servizio per creare la nota
+        
         noteService.createNote(note, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -388,7 +393,7 @@ public class NotaBene implements EntryPoint {
         });
     }
 
-    //Pulisce i campi del form di login
+    
     private void clearLoginForm() {
         loginForm.getUsernameBox().setText("");
         loginForm.getPasswordBox().setText("");
@@ -415,7 +420,6 @@ public class NotaBene implements EntryPoint {
                 showLoginForm();
             }
         });
-
 
         registrationForm.getConfirmButton().addClickHandler(new ClickHandler() {
             @Override
@@ -490,7 +494,7 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-        // handler per il pulsante "Torna alla Lista" nella pagina di dettaglio
+        
         noteDetailPage.getBackButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -498,7 +502,7 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-        // handler per il pulsante "Elimina" nella pagina di dettaglio
+        
         noteDetailPage.getDeleteButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -509,7 +513,7 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-        // handler per il pulsante "Modifica" nella pagina di dettaglio
+        
         noteDetailPage.getEditButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -520,7 +524,7 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-        // handler per il pulsante "Cronologia Versioni" nella pagina di dettaglio
+        
         noteDetailPage.getVersionHistoryButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -528,7 +532,7 @@ public class NotaBene implements EntryPoint {
             }
         });
         
-        // handler per il pulsante "Duplica" nella pagina di dettaglio
+        
         noteDetailPage.getDuplicateButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -539,7 +543,7 @@ public class NotaBene implements EntryPoint {
             }
         });
         
-        // handler per il pulsante "Torna alla Nota" nella pagina cronologia versioni
+        
         versionHistoryPage.getBackButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -547,7 +551,7 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-        // handler per i click sulle note nella homepage
+        
         homePage.setNoteClickHandler(new HomePage.NoteClickHandler() {
             @Override
             public void onNoteClick(Note note) {
@@ -555,7 +559,7 @@ public class NotaBene implements EntryPoint {
             }
         });
 
-        // handler per la modifica delle note
+        
         editNoteForm.getUpdateButton().addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

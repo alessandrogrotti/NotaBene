@@ -22,4 +22,6 @@ public interface NoteService extends RemoteService {
     boolean deleteNote(String noteId, String username);
     
     Note duplicateNote(String noteId, String username) throws IllegalArgumentException;
+    
+    boolean removeUserFromNote(String noteId, String usernameToRemove, String requestingUsername) throws IllegalArgumentException;
 }

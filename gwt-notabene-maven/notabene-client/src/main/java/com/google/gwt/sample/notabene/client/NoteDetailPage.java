@@ -1,11 +1,17 @@
 package com.google.gwt.sample.notabene.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.sample.notabene.shared.Note;
+import com.google.gwt.sample.notabene.shared.NoteService;
+import com.google.gwt.sample.notabene.shared.NoteServiceAsync;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import java.util.Date;
 
 public class NoteDetailPage {
+    private final NoteServiceAsync noteService = GWT.create(NoteService.class);
+    
     private VerticalPanel panel = new VerticalPanel();
     private Label titleLabel = new Label();
     private Label authorLabel = new Label();
@@ -18,7 +24,9 @@ public class NoteDetailPage {
     private Button editButton = new Button("Modifica Nota");
     private Button duplicateButton = new Button("Duplica");
     private Button versionHistoryButton = new Button("Cronologia Versioni");
+    private Button removeFromNoteButton = new Button("Rimuoviti da questa nota");
     private HorizontalPanel buttonPanel = new HorizontalPanel();
+    private Label statusLabel = new Label();
     
     private Note currentNote;
     private String currentUsername;
@@ -46,6 +54,8 @@ public class NoteDetailPage {
         deleteButton.setStyleName("delete-button");
         editButton.setStyleName("edit-button");
         duplicateButton.setStyleName("duplicate-button");
+        removeFromNoteButton.setStyleName("back-button");
+        statusLabel.setStyleName("form-label");
         
         buttonPanel.setSpacing(10);
         buttonPanel.add(backButton);
@@ -53,8 +63,10 @@ public class NoteDetailPage {
         buttonPanel.add(editButton);
         buttonPanel.add(duplicateButton);
         buttonPanel.add(versionHistoryButton);
+        buttonPanel.add(removeFromNoteButton);
         
         panel.add(buttonPanel);
+        panel.add(statusLabel);
         panel.add(titleLabel);
         panel.add(authorLabel);
         panel.add(createdDateLabel);
@@ -71,6 +83,53 @@ public class NoteDetailPage {
         tagsLabel.setStyleName("form-label");
         panel.add(tagsLabel);
         panel.add(tagsPanel);
+        
+        removeFromNoteButton.setVisible(false);
+        statusLabel.setVisible(false);
+        setupRemoveFromNoteHandler();
+    }
+    
+    private void setupRemoveFromNoteHandler() {
+        removeFromNoteButton.addClickHandler(event -> {
+            if (currentNote != null && currentUsername != null) {
+                if (com.google.gwt.user.client.Window.confirm("Sei sicuro di volerti rimuovere da questa nota? Non potrai più accedervi.")) {
+                    removeUserFromNote();
+                }
+            }
+        });
+    }
+    
+    private void removeUserFromNote() {
+        statusLabel.setText("Rimozione in corso...");
+        statusLabel.setStyleName("form-label");
+        statusLabel.setVisible(true);
+        
+        noteService.removeUserFromNote(currentNote.getId(), currentUsername, currentUsername, new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                statusLabel.setText("Errore durante la rimozione: " + caught.getMessage());
+                statusLabel.setStyleName("error-message");
+                statusLabel.setVisible(true);
+            }
+            
+            @Override
+            public void onSuccess(Boolean result) {
+                if (result) {
+                    statusLabel.setText("Ti sei rimosso con successo da questa nota.");
+                    statusLabel.setStyleName("success-message");
+                    statusLabel.setVisible(true);
+                    
+                    removeFromNoteButton.setVisible(false);
+                    editButton.setVisible(false);
+                    duplicateButton.setVisible(false);
+                    versionHistoryButton.setVisible(false);
+                } else {
+                    statusLabel.setText("Errore durante la rimozione dalla nota");
+                    statusLabel.setStyleName("error-message");
+                    statusLabel.setVisible(true);
+                }
+            }
+        });
     }
     
     public void showNote(Note note, String username) {
@@ -115,11 +174,16 @@ public class NoteDetailPage {
         boolean isOwner = currentUsername != null && currentUsername.equals(note.getOwnerUsername());
         boolean canWrite = currentUsername != null && note.canWrite(currentUsername);
         boolean canRead = currentUsername != null && note.canRead(currentUsername);
+        boolean hasPermissions = currentUsername != null && (note.getReadOnlyUsers().contains(currentUsername) || note.getWriteUsers().contains(currentUsername));
 
         deleteButton.setVisible(isOwner);
         editButton.setVisible(canWrite);
         duplicateButton.setVisible(canRead); // pulsante duplica visibile solo se l'utente ha i permessi in lettura
         versionHistoryButton.setVisible(note.hasVersionHistory());
+        
+        removeFromNoteButton.setVisible(!isOwner && hasPermissions);
+        
+        statusLabel.setVisible(false);
         
         // mostra il contenuto 
         String content = note.getContent();
@@ -172,5 +236,9 @@ public class NoteDetailPage {
 
     public Button getDuplicateButton() {
         return duplicateButton;
+    }
+    
+    public Button getRemoveFromNoteButton() {
+        return removeFromNoteButton;
     }
 }

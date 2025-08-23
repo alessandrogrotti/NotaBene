@@ -73,10 +73,10 @@ public class EditNoteForm {
     }
 
     private void setupForm() {
-    panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
-    panel.setSpacing(15);
-    panel.setWidth("80%");
-    panel.setStyleName("form-container"); 
+        panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+        panel.setSpacing(15);
+        panel.setWidth("80%");
+        panel.setStyleName("form-container"); 
         formTitle.setStyleName("form-title");
         lockStatusLabel.setStyleName("lock-status-label");
         titleLabel.setStyleName("form-label");
@@ -236,9 +236,17 @@ public class EditNoteForm {
         
         selectedReadUsers.clear();
         selectedReadUsers.addAll(note.getReadOnlyUsers());
+
+        if (note.getOwnerUsername() != null) {
+            selectedReadUsers.remove(note.getOwnerUsername());
+        }
         
         selectedWriteUsers.clear();
         selectedWriteUsers.addAll(note.getWriteUsers());
+        
+        if (note.getOwnerUsername() != null) {
+            selectedWriteUsers.remove(note.getOwnerUsername());
+        }
         
         updateTagsDisplay();
         updateSelectedTagsDisplay();
@@ -341,6 +349,11 @@ public class EditNoteForm {
         availableUsersFlow.clear();
         
         for (User user : availableUsers) {
+            if (currentNote != null && currentNote.getOwnerUsername() != null && 
+                currentNote.getOwnerUsername().equals(user.getUsername())) {
+                continue;
+            }
+            
             if (!selectedReadUsers.contains(user.getUsername()) && 
                 !selectedWriteUsers.contains(user.getUsername())) {
                 
@@ -384,12 +397,20 @@ public class EditNoteForm {
     private void updateSelectedUsersDisplay() {
         selectedReadUsersFlow.clear();
         for (String username : selectedReadUsers) {
+            if (currentNote != null && currentNote.getOwnerUsername() != null && 
+                currentNote.getOwnerUsername().equals(username)) {
+                continue;
+            }
             HorizontalPanel userPanel = createSelectedUserPanel(username, true);
             selectedReadUsersFlow.add(userPanel);
         }
         
         selectedWriteUsersFlow.clear();
         for (String username : selectedWriteUsers) {
+            if (currentNote != null && currentNote.getOwnerUsername() != null && 
+                currentNote.getOwnerUsername().equals(username)) {
+                continue;
+            }
             HorizontalPanel userPanel = createSelectedUserPanel(username, false);
             selectedWriteUsersFlow.add(userPanel);
         }

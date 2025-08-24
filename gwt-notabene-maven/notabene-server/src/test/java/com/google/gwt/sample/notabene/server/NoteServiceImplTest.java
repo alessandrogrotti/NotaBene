@@ -390,6 +390,151 @@ public class NoteServiceImplTest {
         });
         assertEquals("ID della nota e username sono obbligatori", exception3.getMessage());
     }
+    
+    @Test
+    void testRemoveUserFromNoteSuccess() {
+        Note note = new Note("Nota condivisa", "Contenuto condiviso", "owner");
+        note.setPermission(NotePermission.READ_WRITE);
+        note.getReadOnlyUsers().add("lettore1");
+        note.getWriteUsers().add("scrittore1");
+        note.getWriteUsers().add("scrittore2");
+        service.createNote(note);
+        
+        boolean result = service.removeUserFromNote(note.getId(), "scrittore1", "scrittore1");
+        
+        assertTrue(result);
+        
+        Note updated = service.getNoteById(note.getId(), "owner");
+        assertFalse(updated.getWriteUsers().contains("scrittore1"));
+        assertTrue(updated.getWriteUsers().contains("scrittore2"));
+        assertTrue(updated.getReadOnlyUsers().contains("lettore1"));
+    }
+    
+    @Test
+    void testRemoveUserFromNoteReadOnlySuccess() {
+        Note note = new Note("Nota sola lettura", "Contenuto", "owner");
+        note.setPermission(NotePermission.READ_ONLY);
+        note.getReadOnlyUsers().add("lettore1");
+        note.getReadOnlyUsers().add("lettore2");
+        service.createNote(note);
+        
+        boolean result = service.removeUserFromNote(note.getId(), "lettore1", "lettore1");
+        
+        assertTrue(result);
+        
+        Note updated = service.getNoteById(note.getId(), "owner");
+        assertFalse(updated.getReadOnlyUsers().contains("lettore1"));
+        assertTrue(updated.getReadOnlyUsers().contains("lettore2"));
+    }
+    
+    @Test
+    void testRemoveUserFromNoteInvalidNoteId() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote(null, "user", "requester");
+        });
+        assertEquals("L'ID della nota è obbligatorio", exception.getMessage());
+        
+        exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote("", "user", "requester");
+        });
+        assertEquals("L'ID della nota è obbligatorio", exception.getMessage());
+    }
+    
+    @Test
+    void testRemoveUserFromNoteInvalidUsername() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote("noteId", null, "requester");
+        });
+        assertEquals("L'username da rimuovere è obbligatorio", exception.getMessage());
+        
+        exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote("noteId", "", "requester");
+        });
+        assertEquals("L'username da rimuovere è obbligatorio", exception.getMessage());
+    }
+    
+    @Test
+    void testRemoveUserFromNoteInvalidRequester() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote("noteId", "user", null);
+        });
+        assertEquals("L'username richiedente è obbligatorio", exception.getMessage());
+        
+        exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote("noteId", "user", "");
+        });
+        assertEquals("L'username richiedente è obbligatorio", exception.getMessage());
+    }
+    
+    @Test
+    void testRemoveUserFromNoteNotFound() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote("nota_inesistente", "user", "requester");
+        });
+        assertEquals("Nota non trovata", exception.getMessage());
+    }
+    
+    @Test
+    void testRemoveOwnerFromNote() {
+        Note note = new Note("Nota del proprietario", "Contenuto", "owner");
+        note.setPermission(NotePermission.READ_WRITE);
+        service.createNote(note);
+        
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote(note.getId(), "owner", "owner");
+        });
+        assertEquals("Il proprietario della nota non può rimuovere se stesso", exception.getMessage());
+    }
+    
+    @Test
+    void testRemoveUserFromNoteUserHasNoPermissions() {
+        Note note = new Note("Nota condivisa", "Contenuto", "owner");
+        note.setPermission(NotePermission.READ_WRITE);
+        note.getWriteUsers().add("scrittore1");
+        service.createNote(note);
+        
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            service.removeUserFromNote(note.getId(), "utente_senza_permessi", "owner");
+        });
+        assertEquals("L'utente non ha permessi su questa nota", exception.getMessage());
+    }
+    
+    @Test
+    void testRemoveUserFromNoteBothReadAndWrite() {
+        Note note = new Note("Nota con permessi misti", "Contenuto", "owner");
+        note.setPermission(NotePermission.READ_WRITE);
+        note.getReadOnlyUsers().add("utente1");
+        note.getWriteUsers().add("utente1"); 
+        service.createNote(note);
+        
+        boolean result = service.removeUserFromNote(note.getId(), "utente1", "utente1");
+        
+        assertTrue(result);
+        
+        Note updated = service.getNoteById(note.getId(), "owner");
+        assertFalse(updated.getReadOnlyUsers().contains("utente1"));
+        assertFalse(updated.getWriteUsers().contains("utente1"));
+    }
+    
+    @Test
+    void testRemoveUserFromNoteAffectsAccessibility() {
+        Note note = new Note("Nota condivisa", "Contenuto", "owner");
+        note.setPermission(NotePermission.READ_ONLY);
+        note.getReadOnlyUsers().add("lettore1");
+        service.createNote(note);
+        
+        List<Note> accessibleNotes = service.getAccessibleNotes("lettore1");
+        assertEquals(1, accessibleNotes.size());
+        
+        boolean result = service.removeUserFromNote(note.getId(), "lettore1", "lettore1");
+        assertTrue(result);
+        
+        accessibleNotes = service.getAccessibleNotes("lettore1");
+        assertEquals(0, accessibleNotes.size());
+        
+        Note retrievedNote = service.getNoteById(note.getId(), "lettore1");
+        assertNull(retrievedNote);
+    }
 
   
 }

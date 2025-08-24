@@ -285,5 +285,64 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
             throw new IllegalArgumentException("Errore durante la duplicazione della nota: " + e.getMessage());
         }
     }
+    
+    @Override
+    public boolean removeUserFromNote(String noteId, String usernameToRemove, String requestingUsername) throws IllegalArgumentException {
+        if (noteId == null || noteId.trim().isEmpty()) {
+            throw new IllegalArgumentException("L'ID della nota è obbligatorio");
+        }
+        
+        if (usernameToRemove == null || usernameToRemove.trim().isEmpty()) {
+            throw new IllegalArgumentException("L'username da rimuovere è obbligatorio");
+        }
+        
+        if (requestingUsername == null || requestingUsername.trim().isEmpty()) {
+            throw new IllegalArgumentException("L'username richiedente è obbligatorio");
+        }
+        
+        try {
+            Note note = noteRepository.getNote(noteId);
+            if (note == null) {
+                throw new IllegalArgumentException("Nota non trovata");
+            }
+            
+            if (!note.getOwnerUsername().equals(requestingUsername) && !usernameToRemove.equals(requestingUsername)) {
+                throw new IllegalArgumentException("Non hai i permessi per rimuovere questo utente dalla nota");
+            }
+            
+            if (note.getOwnerUsername().equals(usernameToRemove)) {
+                throw new IllegalArgumentException("Il proprietario della nota non può rimuovere se stesso");
+            }
+            
+            boolean removed = false;
+            if (note.getReadOnlyUsers().contains(usernameToRemove)) {
+                note.getReadOnlyUsers().remove(usernameToRemove);
+                removed = true;
+            }
+            if (note.getWriteUsers().contains(usernameToRemove)) {
+                note.getWriteUsers().remove(usernameToRemove);
+                removed = true;
+            }
+            
+            if (!removed) {
+                throw new IllegalArgumentException("L'utente non ha permessi su questa nota");
+            }
+            
+            boolean result = noteRepository.saveNote(note);
+            
+            if (result) {
+                System.out.println("Utente " + usernameToRemove + " rimosso dalla nota " + noteId + " da " + requestingUsername);
+            }
+            
+            return result;
+            
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Errore durante la rimozione dell'utente dalla nota: " + e.getMessage());
+            e.printStackTrace();
+            throw new IllegalArgumentException("Errore durante la rimozione dell'utente dalla nota: " + e.getMessage());
+        }
+    }
    
 }

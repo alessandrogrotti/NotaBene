@@ -53,7 +53,6 @@ public class EditNoteForm {
     private HorizontalPanel buttonPanel = new HorizontalPanel();
     private Button updateButton = new Button("Aggiorna Nota");
     private Button cancelButton = new Button("Annulla");
-    private Button releaseLockButton = new Button("Rilascia Blocco");
     private List<Tag> availableTags = new ArrayList<>();
     private List<User> availableUsers = new ArrayList<>();
     private Note currentNote;
@@ -69,7 +68,6 @@ public class EditNoteForm {
     public EditNoteForm() {
         setupForm();
         loadAvailableData();
-        setupReleaseLockHandler();
     }
 
     private void setupForm() {
@@ -95,7 +93,6 @@ public class EditNoteForm {
         permissionBox.setWidth("400px");
         updateButton.setStyleName("form-button");
         cancelButton.setStyleName("back-button form-cancel-lower");
-        releaseLockButton.setStyleName("form-button-secondary");
         
         permissionBox.addItem(NotePermission.PRIVATE.getDisplayName(), NotePermission.PRIVATE.name());
         permissionBox.addItem(NotePermission.READ_ONLY.getDisplayName(), NotePermission.READ_ONLY.name());
@@ -112,9 +109,7 @@ public class EditNoteForm {
         buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         updateButton.getElement().getStyle().setProperty("verticalAlign", "middle");
         cancelButton.getElement().getStyle().setProperty("verticalAlign", "middle");
-        releaseLockButton.getElement().getStyle().setProperty("verticalAlign", "middle");
         buttonPanel.add(updateButton);
-        buttonPanel.add(releaseLockButton);
         buttonPanel.add(cancelButton);
         
         panel.add(formTitle);
@@ -132,7 +127,6 @@ public class EditNoteForm {
         
         usersSection.setVisible(false);
         lockStatusLabel.setVisible(false);
-        releaseLockButton.setVisible(false);
     }
     
     private void setupTagsSection() {
@@ -165,20 +159,6 @@ public class EditNoteForm {
         usersSection.add(selectedWriteUsersFlow);
         usersSection.add(new Label("Utenti disponibili:"));
         usersSection.add(availableUsersFlow);
-    }
-
-    private void setupReleaseLockHandler() {
-        if (!releaseLockHandlerAdded) {
-            releaseLockButton.addClickHandler(event -> {
-                if (currentNote != null && currentUsername != null && lockAcquired) {
-                    releaseLock(currentNote.getId(), currentUsername, () -> {
-                        updateLockStatus("Blocco rilasciato", false);
-                        disableEditingInterface();
-                    });
-                }
-            });
-            releaseLockHandlerAdded = true;
-        }
     }
     
     private void loadAvailableData() {
@@ -686,7 +666,6 @@ public class EditNoteForm {
         titleBox.setEnabled(true);
         contentArea.setEnabled(true);
         updateButton.setEnabled(true);
-        releaseLockButton.setVisible(true);
         permissionBox.setEnabled(isCurrentUserAuthor);
     }
     
@@ -694,7 +673,6 @@ public class EditNoteForm {
         titleBox.setEnabled(false);
         contentArea.setEnabled(false);
         updateButton.setEnabled(false);
-        releaseLockButton.setVisible(false);
         permissionBox.setEnabled(false);
     }
     
@@ -727,7 +705,6 @@ public class EditNoteForm {
     
     public Button getUpdateButton() { return updateButton; }
     public Button getCancelButton() { return cancelButton; }
-    public Button getReleaseLockButton() { return releaseLockButton; }
     public TextBox getTitleBox() { return titleBox; }
     public TextArea getContentArea() { return contentArea; }
     public ListBox getPermissionBox() { return permissionBox; }

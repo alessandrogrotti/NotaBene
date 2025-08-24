@@ -188,17 +188,8 @@ public class NoteServiceImpl extends RemoteServiceServlet implements NoteService
                 existingNote.setPermission(note.getPermission());
                 existingNote.setReadOnlyUsers(note.getReadOnlyUsers());
                 existingNote.setWriteUsers(note.getWriteUsers());
-                existingNote.markAsModified(username);
-                note.setVersionNumber(existingNote.getVersionNumber());
-                note.setLastModified(existingNote.getLastModified());
-                if (existingNote.getVersions() instanceof LinkedList) {
-                    note.setVersions((LinkedList<NoteVersion>) existingNote.getVersions());
-                } else {
-                    note.setVersions(new LinkedList<>(existingNote.getVersions()));
-                }
                 
                 boolean result = noteRepository.saveNote(existingNote);
-                
                 
                 if (result) {
                     lockManager.releaseLock(note.getId(), username);

@@ -51,7 +51,7 @@ public class EditNoteForm {
     private FlowPanel selectedWriteUsersFlow = new FlowPanel();
     private Set<String> selectedWriteUsers = new HashSet<>();
     private HorizontalPanel buttonPanel = new HorizontalPanel();
-    private Button updateButton = new Button("Aggiorna Nota");
+    private Button updateButton = new Button("Aggiorna");
     private Button cancelButton = new Button("Annulla");
     private List<Tag> availableTags = new ArrayList<>();
     private List<User> availableUsers = new ArrayList<>();

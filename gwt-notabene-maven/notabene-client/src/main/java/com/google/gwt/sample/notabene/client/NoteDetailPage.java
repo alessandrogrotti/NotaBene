@@ -20,8 +20,8 @@ public class NoteDetailPage {
     private HTML contentArea = new HTML();
     private FlowPanel tagsPanel = new FlowPanel();
     private Button backButton = new Button("Torna alla Lista");
-    private Button deleteButton = new Button("Elimina Nota");
-    private Button editButton = new Button("Modifica Nota");
+    private Button deleteButton = new Button("Elimina");
+    private Button editButton = new Button("Modifica");
     private Button duplicateButton = new Button("Duplica");
     private Button versionHistoryButton = new Button("Cronologia Versioni");
     private Button removeFromNoteButton = new Button("Rimuoviti da questa nota");

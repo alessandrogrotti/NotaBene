@@ -72,7 +72,7 @@ public class NotaBene implements EntryPoint {
     
     private void showCreateNoteForm() {
         if (currentUser != null) {
-            createNoteForm.show();
+            createNoteForm.show(currentUser.getUsername());
         }
     }
 

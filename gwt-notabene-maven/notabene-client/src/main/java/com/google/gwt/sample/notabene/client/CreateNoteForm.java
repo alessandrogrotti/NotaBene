@@ -19,6 +19,7 @@ import java.util.Set;
 public class CreateNoteForm {
     private final TagServiceAsync tagService = GWT.create(TagService.class);
     private final UserServiceAsync userService = GWT.create(UserService.class);
+    private String currentUsername;
     
     private VerticalPanel panel = new VerticalPanel();
     private Label formTitle = new Label("Crea una nuova nota");
@@ -114,7 +115,7 @@ public class CreateNoteForm {
         permissionBox.setWidth("400px");
         
         createButton.setStyleName("form-button");
-    cancelButton.setStyleName("back-button form-cancel-lower");
+        cancelButton.setStyleName("back-button form-cancel-lower");
         
         // listbox permessi
         permissionBox.addItem(NotePermission.PRIVATE.getDisplayName(), NotePermission.PRIVATE.name());
@@ -129,13 +130,13 @@ public class CreateNoteForm {
         setupTagsSection();
         setupUsersSection();
         
-    buttonPanel.setSpacing(10);
-    buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-    createButton.getElement().getStyle().setProperty("verticalAlign", "middle");
-    cancelButton.getElement().getStyle().setProperty("verticalAlign", "middle");
-    buttonPanel.add(createButton);
-    buttonPanel.add(cancelButton);
-  
+        buttonPanel.setSpacing(10);
+        buttonPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+        createButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+        cancelButton.getElement().getStyle().setProperty("verticalAlign", "middle");
+        buttonPanel.add(createButton);
+        buttonPanel.add(cancelButton);
+    
         panel.add(formTitle);
         panel.add(titleLabel);
         panel.add(titleBox);
@@ -278,6 +279,10 @@ public class CreateNoteForm {
         availableUsersFlow.clear();
         
         for (User user : availableUsers) {
+
+            if (currentUsername != null && currentUsername.equals(user.getUsername())) {
+                continue;
+            }
     
             if (!selectedReadUsers.contains(user.getUsername()) && 
                 !selectedWriteUsers.contains(user.getUsername())) {
@@ -391,6 +396,11 @@ public class CreateNoteForm {
         RootPanel.get("list").clear();
         RootPanel.get("list").add(panel);
         loadAvailableData(); 
+    }
+
+    public void show(String currentUsername) {
+        this.currentUsername = currentUsername;
+        show();
     }
 
     public void clearForm() {

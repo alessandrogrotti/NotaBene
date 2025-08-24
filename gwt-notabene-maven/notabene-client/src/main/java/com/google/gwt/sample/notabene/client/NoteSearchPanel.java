@@ -62,28 +62,44 @@ public class NoteSearchPanel extends Composite {
         
         VerticalPanel contentPanel = new VerticalPanel();
         contentPanel.setStyleName("search-content-container");
+        contentPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+        contentPanel.setSpacing(5);
+        contentPanel.setWidth("100%");
+        
+        // Centrare tutto il contenuto
+        HorizontalPanel contentWrapper = new HorizontalPanel();
+        contentWrapper.setWidth("100%");
+        contentWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        contentWrapper.add(contentPanel);
+        
+        mainPanel.add(contentWrapper);
         
         HorizontalPanel firstRow = new HorizontalPanel();
         firstRow.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
-        firstRow.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+        firstRow.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
         firstRow.setStyleName("search-row");
+        firstRow.setSpacing(20);
+        firstRow.setWidth("100%");
         
         HorizontalPanel searchGroup = new HorizontalPanel();
         searchGroup.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+        searchGroup.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        searchGroup.setSpacing(8);
         
         Label searchLabel = new Label("Cerca:");
         searchLabel.setStyleName("search-field-label");
         
         keywordBox = new TextBox();
         keywordBox.setStyleName("form-input");
-        keywordBox.setWidth("300px");
-        keywordBox.getElement().setPropertyString("placeholder", "Cerca nelle tue note...");
+        keywordBox.setWidth("250px");
         
         searchGroup.add(searchLabel);
         searchGroup.add(keywordBox);
         
         HorizontalPanel tagGroup = new HorizontalPanel();
         tagGroup.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+        tagGroup.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        tagGroup.setSpacing(8);
         
         Label tagLabel = new Label("Tag:");
         tagLabel.setStyleName("search-field-label");
@@ -95,12 +111,23 @@ public class NoteSearchPanel extends Composite {
         tagGroup.add(tagLabel);
         tagGroup.add(tagListBox);
         
-        firstRow.add(searchGroup);
-        firstRow.add(tagGroup);
+        // Wrapper per centrare i gruppi nella prima riga
+        HorizontalPanel firstRowWrapper = new HorizontalPanel();
+        firstRowWrapper.setWidth("100%");
+        firstRowWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        firstRowWrapper.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+        firstRowWrapper.setSpacing(30);
+        firstRowWrapper.add(searchGroup);
+        firstRowWrapper.add(tagGroup);
+        
+        firstRow.add(firstRowWrapper);
         
         HorizontalPanel secondRow = new HorizontalPanel();
         secondRow.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+        secondRow.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
         secondRow.setStyleName("search-buttons-row");
+        secondRow.setSpacing(15);
+        secondRow.setWidth("100%");
         
         toggleFiltersButton = new Button("Filtri Avanzati");
         toggleFiltersButton.setStyleName("toggle-advanced-filters-btn");
@@ -108,16 +135,32 @@ public class NoteSearchPanel extends Composite {
         clearButton = new Button("Pulisci");
         clearButton.setStyleName("clear-search-btn");
         
-        secondRow.add(toggleFiltersButton);
-        secondRow.add(clearButton);
+        // Wrapper per centrare i bottoni nella seconda riga
+        HorizontalPanel secondRowWrapper = new HorizontalPanel();
+        secondRowWrapper.setWidth("100%");
+        secondRowWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        secondRowWrapper.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+        secondRowWrapper.setSpacing(15);
+        secondRowWrapper.add(toggleFiltersButton);
+        secondRowWrapper.add(clearButton);
+        
+        secondRow.add(secondRowWrapper);
         
         contentPanel.add(firstRow);
         selectedTagsPanel = new HorizontalPanel();
         selectedTagsPanel.setStyleName("inline-tags");
-        contentPanel.add(selectedTagsPanel);
-        contentPanel.add(secondRow);
+        selectedTagsPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        selectedTagsPanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+        selectedTagsPanel.setSpacing(8);
         
-        mainPanel.add(contentPanel);
+        // Wrapper per centrare i tag selezionati
+        HorizontalPanel selectedTagsWrapper = new HorizontalPanel();
+        selectedTagsWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        selectedTagsWrapper.setWidth("100%");
+        selectedTagsWrapper.add(selectedTagsPanel);
+        
+        contentPanel.add(selectedTagsWrapper);
+        contentPanel.add(secondRow);
         
         advancedFiltersPanel = createAdvancedFiltersPanel();
         advancedFiltersPanel.setVisible(false);
@@ -130,6 +173,7 @@ public class NoteSearchPanel extends Composite {
         VerticalPanel filtersPanel = new VerticalPanel();
         filtersPanel.setStyleName("advanced-filters-panel");
         filtersPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+        filtersPanel.setWidth("100%");
         
         Label filtersTitle = new Label("Filtri Avanzati");
         filtersTitle.setStyleName("advanced-filters-title");
@@ -137,6 +181,9 @@ public class NoteSearchPanel extends Composite {
         
         FlexTable filtersTable = new FlexTable();
         filtersTable.setStyleName("filters-container");
+        filtersTable.setCellSpacing(10);
+        filtersTable.setCellPadding(5);
+        filtersTable.setWidth("auto");
         
         int row = 0;
         
@@ -146,8 +193,7 @@ public class NoteSearchPanel extends Composite {
         
         authorBox = new TextBox();
         authorBox.setStyleName("form-input");
-        authorBox.setWidth("200px");
-        authorBox.getElement().setPropertyString("placeholder", "Nome autore...");
+        authorBox.setWidth("150px");
         filtersTable.setWidget(row, 1, authorBox);
         
         Label fromLabel = new Label("Dal:");
@@ -156,7 +202,7 @@ public class NoteSearchPanel extends Composite {
         
         startDateBox = new DateBox();
         startDateBox.setStyleName("form-input");
-        startDateBox.setWidth("130px");
+        startDateBox.setWidth("120px");
         filtersTable.setWidget(row, 3, startDateBox);
         
         Label toLabel = new Label("Al:");
@@ -165,7 +211,7 @@ public class NoteSearchPanel extends Composite {
         
         endDateBox = new DateBox();
         endDateBox.setStyleName("form-input");
-        endDateBox.setWidth("130px");
+        endDateBox.setWidth("120px");
         filtersTable.setWidget(row, 5, endDateBox);
         
         for (int col = 0; col < 6; col++) {
@@ -173,7 +219,13 @@ public class NoteSearchPanel extends Composite {
             filtersTable.getCellFormatter().setHorizontalAlignment(row, col, HasHorizontalAlignment.ALIGN_CENTER);
         }
         
-        filtersPanel.add(filtersTable);
+        // Wrapper per centrare la tabella filtri
+        HorizontalPanel filtersTableWrapper = new HorizontalPanel();
+        filtersTableWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        filtersTableWrapper.setWidth("100%");
+        filtersTableWrapper.add(filtersTable);
+        
+        filtersPanel.add(filtersTableWrapper);
         
         return filtersPanel;
     }
@@ -283,6 +335,7 @@ public class NoteSearchPanel extends Composite {
     private void addTagToSelectedPanel(String tag) {
         HorizontalPanel tagItem = new HorizontalPanel();
         tagItem.setStyleName("simple-selected-tag");
+        tagItem.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
         
         Label tagLabel = new Label(tag);
         tagLabel.setStyleName("simple-tag-text");

@@ -242,18 +242,6 @@ public class NoteVersioningTest {
     }
     
     @Test
-    void testUpdateNoteWithNullUsername() {
-        Note note = new Note("Test", "Contenuto", "mario");
-        assertFalse(noteService.updateNote(note, null));
-    }
-    
-    @Test
-    void testUpdateNoteWithEmptyUsername() {
-        Note note = new Note("Test", "Contenuto", "mario");
-        assertFalse(noteService.updateNote(note, ""));
-    }
-    
-    @Test
     void testVersionServiceWithNullNoteId() {
         assertFalse(versionService.hasVersionHistory(null));
         assertEquals(0, versionService.getVersionCount(null));

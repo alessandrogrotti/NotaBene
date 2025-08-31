@@ -2,7 +2,7 @@ package com.google.gwt.sample.notabene.shared;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-//Interfaccia Asincrona per il servizio utente
+//Interfaccia Asincrona per UserService utilizzata dal client GWT
 public interface UserServiceAsync {
  
     void registerUser(User user, AsyncCallback<Boolean> callback);

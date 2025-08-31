@@ -8,6 +8,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.util.List;
 import java.util.ArrayList;
 
+// Implementazione del servizio di versionamento delle note
 public class NoteVersionServiceImpl extends RemoteServiceServlet implements NoteVersionService {
     
     private final NoteRepository noteRepository = NoteRepository.getInstance();

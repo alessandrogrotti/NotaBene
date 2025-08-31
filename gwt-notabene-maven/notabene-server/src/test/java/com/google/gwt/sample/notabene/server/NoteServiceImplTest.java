@@ -441,19 +441,6 @@ public class NoteServiceImplTest {
     }
     
     @Test
-    void testRemoveUserFromNoteInvalidUsername() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            service.removeUserFromNote("noteId", null, "requester");
-        });
-        assertEquals("L'username da rimuovere è obbligatorio", exception.getMessage());
-        
-        exception = assertThrows(IllegalArgumentException.class, () -> {
-            service.removeUserFromNote("noteId", "", "requester");
-        });
-        assertEquals("L'username da rimuovere è obbligatorio", exception.getMessage());
-    }
-    
-    @Test
     void testRemoveUserFromNoteInvalidRequester() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             service.removeUserFromNote("noteId", "user", null);

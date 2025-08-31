@@ -9,7 +9,7 @@ public class Tag implements Serializable, IsSerializable {
     
     private String name;
     
-    // Costruttore vuoto per GWT
+    // Costruttore di default (per GWT)
     public Tag() {
     }
 

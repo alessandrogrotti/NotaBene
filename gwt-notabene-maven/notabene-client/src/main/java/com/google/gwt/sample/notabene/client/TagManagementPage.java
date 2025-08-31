@@ -8,12 +8,8 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.sample.notabene.shared.Tag;
 import com.google.gwt.sample.notabene.shared.TagService;
 import com.google.gwt.sample.notabene.shared.TagServiceAsync;
-
 import java.util.List;
 
-/**
- * Pagina per gestire i tag del sistema
- */
 public class TagManagementPage {
     
     private final TagServiceAsync tagService = GWT.create(TagService.class);
@@ -23,7 +19,7 @@ public class TagManagementPage {
     private Button backButton = new Button("Torna alla Lista");
     private Button addTagButton = new Button("Aggiungi Tag");
     
-    // Form per aggiungere un nuovo tag
+    // form per aggiungere un nuovo tag
     private VerticalPanel addTagForm = new VerticalPanel();
     private TextBox tagNameBox = new TextBox();
     private Button saveTagButton = new Button("Salva Tag");
@@ -31,7 +27,7 @@ public class TagManagementPage {
     private Label errorLabel = new Label();
     private Label successLabel = new Label();
     
-    // Pannello per la lista dei tag
+    // pannello per la lista dei tag
     private VerticalPanel tagListPanel = new VerticalPanel();
     private Label tagListTitle = new Label("Tutti i Tag:");
     
@@ -47,24 +43,19 @@ public class TagManagementPage {
         mainPanel.setSpacing(20);
         mainPanel.setWidth("100%");
         mainPanel.setStyleName("form-container"); 
-        
-        // Titolo
+    
         titleLabel.setStyleName("form-title");
         mainPanel.add(titleLabel);
         
-        // Pulsanti di navigazione
         addTagButton.setStyleName("form-button");
         backButton.setStyleName("back-button");
         mainPanel.add(addTagButton);
         mainPanel.add(backButton);
-        
-        // Setup del form per aggiungere tag
+    
         setupAddTagForm();
-        
-        // Setup della lista tag
+ 
         setupTagList();
-        
-        // Labels per messaggi
+
         errorLabel.setStyleName("error-message");
         successLabel.setStyleName("success-message");
         mainPanel.add(errorLabel);
@@ -83,16 +74,14 @@ public class TagManagementPage {
         Label formTitle = new Label("Aggiungi Nuovo Tag");
         formTitle.setStyleName("form-title");
         addTagForm.add(formTitle);
-        
-        // Nome tag
+
         Label nameLabel = new Label("Nome Tag:");
         nameLabel.setStyleName("form-label");
         tagNameBox.setStyleName("form-input");
         tagNameBox.getElement().setPropertyString("placeholder", "Inserisci il nome del tag");
         addTagForm.add(nameLabel);
         addTagForm.add(tagNameBox);
-        
-        // Pulsanti del form
+
         saveTagButton.setStyleName("form-button");
         cancelButton.setStyleName("back-button");
         HorizontalPanel buttonPanel = new HorizontalPanel();
@@ -145,8 +134,7 @@ public class TagManagementPage {
     public void show() {
         RootPanel.get("list").clear();
         RootPanel.get("list").add(mainPanel);
-        
-        // Carica tutti i tag
+
         loadAllTags();
     }
     
@@ -169,7 +157,7 @@ public class TagManagementPage {
         
         String tagName = tagNameBox.getText().trim();
         
-        // Validazione client-side
+        // validazione client-side
         if (tagName.isEmpty()) {
             showError("Il nome del tag è obbligatorio");
             return;
@@ -185,10 +173,9 @@ public class TagManagementPage {
             return;
         }
         
-        // Crea il tag
         Tag newTag = new Tag(tagName);
         
-        // Salva il tag tramite servizio
+        //utilizziamo il service per salvare il tag
         tagService.createTag(newTag, new AsyncCallback<Boolean>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -201,7 +188,7 @@ public class TagManagementPage {
                     showSuccess("Tag creato con successo!");
                     clearForm();
                     hideAddTagForm();
-                    loadAllTags(); // Ricarica la lista
+                    loadAllTags(); 
                 } else {
                     showError("Errore durante la creazione del tag");
                 }
@@ -224,7 +211,7 @@ public class TagManagementPage {
     }
     
     private void displayTags(List<Tag> tags) {
-        // Pulisce la lista precedente (mantiene solo il titolo)
+        // pulisce la lista precedente mantenendo solo il titolo
         tagListPanel.clear();
         tagListPanel.add(tagListTitle);
         
@@ -246,13 +233,11 @@ public class TagManagementPage {
         tagPanel.setWidth("400px");
         tagPanel.setStyleName("tag-item");
         tagPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
-        
-        // Nome del tag
+     
         Label nameLabel = new Label(tag.getName());
         nameLabel.setStyleName("form-label");
         nameLabel.setWidth("200px");
-        
-        // Pulsante elimina
+       
         Button deleteButton = new Button("Elimina");
         deleteButton.setStyleName("delete-button");
         deleteButton.addClickHandler(new ClickHandler() {
@@ -281,7 +266,7 @@ public class TagManagementPage {
             public void onSuccess(Boolean result) {
                 if (result) {
                     showSuccess("Tag eliminato con successo!");
-                    loadAllTags(); // Ricarica la lista
+                    loadAllTags(); 
                 } else {
                     showError("Errore durante l'eliminazione del tag");
                 }

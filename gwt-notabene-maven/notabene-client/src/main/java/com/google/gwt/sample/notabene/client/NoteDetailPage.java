@@ -7,7 +7,7 @@ import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
 import com.google.gwt.sample.notabene.shared.NoteServiceAsync;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import java.util.Date;
+
 
 public class NoteDetailPage {
     private final NoteServiceAsync noteService = GWT.create(NoteService.class);
@@ -20,8 +20,8 @@ public class NoteDetailPage {
     private HTML contentArea = new HTML();
     private FlowPanel tagsPanel = new FlowPanel();
     private Button backButton = new Button("Torna alla Lista");
-    private Button deleteButton = new Button("Elimina Nota");
-    private Button editButton = new Button("Modifica Nota");
+    private Button deleteButton = new Button("Elimina");
+    private Button editButton = new Button("Modifica");
     private Button duplicateButton = new Button("Duplica");
     private Button versionHistoryButton = new Button("Cronologia Versioni");
     private Button removeFromNoteButton = new Button("Rimuoviti da questa nota");

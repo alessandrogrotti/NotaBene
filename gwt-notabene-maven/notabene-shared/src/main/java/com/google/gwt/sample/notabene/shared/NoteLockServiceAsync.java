@@ -3,6 +3,7 @@ package com.google.gwt.sample.notabene.shared;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface NoteLockServiceAsync {
+    
     void acquireLock(String noteId, String username, AsyncCallback<NoteLock> callback);
     
     void releaseLock(String noteId, String username, AsyncCallback<Boolean> callback);

@@ -10,7 +10,8 @@ public class User implements Serializable {
     private String password;
     private String name;
     private String surname;
-    // Costruttore di default (serve a GWT)
+    
+    // Costruttore di default (per GWT)
     public User() {
     }
     

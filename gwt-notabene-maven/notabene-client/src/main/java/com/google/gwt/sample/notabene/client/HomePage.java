@@ -56,11 +56,21 @@ public class HomePage {
         panel.setSpacing(20);
         panel.setWidth("100%");
         if (!isAuthenticated || user == null) {
+            VerticalPanel loginPanel = new VerticalPanel();
+            loginPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
+            loginPanel.setSpacing(20);
+            loginPanel.setWidth("100%");
+            loginPanel.setStyleName("form-container");
+            
             welcomeLabel.setText("Benvenuto nella nostra applicazione!");
-            panel.add(welcomeLabel);
-            panel.add(registerButton);
-            panel.add(loginButton);
-            RootPanel.get("list").add(panel);
+            welcomeLabel.setStyleName("form-title");
+            
+            loginPanel.add(welcomeLabel);
+            loginPanel.add(registerButton);
+            loginPanel.add(loginButton);
+            
+            RootPanel.get("list").clear();
+            RootPanel.get("list").add(loginPanel);
         } else {
             currentUsername = user.getUsername();
             welcomeLabel.setText("Benvenuto " + user.getName() + " " + user.getSurname() + "!");
@@ -135,7 +145,7 @@ public class HomePage {
         notesTitle.setStyleName("form-title");
         notesPanel.add(notesTitle);
         
-        // Container per le note
+        // container per le note
         VerticalPanel notesContainer = new VerticalPanel();
         notesContainer.setSpacing(10);
         notesContainer.setWidth("100%");
@@ -254,23 +264,14 @@ public class HomePage {
         noResultsPanel.setSpacing(15);
         noResultsPanel.setStyleName("no-results-panel");
         
-        Label noResultsLabel = new Label("🔍 Nessuna nota trovata");
+        Label noResultsLabel = new Label("Nessuna nota trovata");
         noResultsLabel.setStyleName("no-results-title");
         
         Label suggestionLabel = new Label("Prova a modificare i criteri di ricerca");
         suggestionLabel.setStyleName("no-results-text");
         
-        Button clearFiltersButton = new Button("Cancella Filtri");
-        clearFiltersButton.setStyleName("clear-filters-button");
-        clearFiltersButton.addClickHandler(event -> {
-            if (searchPanel != null) {
-                searchPanel.clearAllFilters();
-            }
-        });
-        
         noResultsPanel.add(noResultsLabel);
         noResultsPanel.add(suggestionLabel);
-        noResultsPanel.add(clearFiltersButton);
         
         notesPanel.add(noResultsPanel);
     }

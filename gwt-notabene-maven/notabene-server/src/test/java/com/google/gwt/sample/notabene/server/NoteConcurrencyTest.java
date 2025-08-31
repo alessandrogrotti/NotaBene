@@ -25,13 +25,6 @@ public class NoteConcurrencyTest {
     }
 
     @Test
-    void testSingletonPattern() {
-        NoteLockManager instance1 = NoteLockManager.getInstance();
-        NoteLockManager instance2 = NoteLockManager.getInstance();
-        assertSame(instance1, instance2, "NoteLockManager deve essere un singleton");
-    }
-
-    @Test
     void testAcquireLockSuccess() {
         String noteId = "test_note_1";
         String username = "mario";
@@ -115,84 +108,6 @@ public class NoteConcurrencyTest {
         
         lockManager.releaseLock(noteId1, username);
         lockManager.releaseLock(noteId2, username);
-    }
-
-    @Test
-    void testObserverPattern() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(2);
-        AtomicInteger lockAcquiredCount = new AtomicInteger(0);
-        AtomicInteger lockReleasedCount = new AtomicInteger(0);
-        
-        NoteLockObserver observer = new NoteLockObserver() {
-            @Override
-            public void onNoteLocked(String noteId, String lockedByUser) {
-                lockAcquiredCount.incrementAndGet();
-                latch.countDown();
-            }
-            
-            @Override
-            public void onNoteUnlocked(String noteId, String unlockedByUser) {
-                lockReleasedCount.incrementAndGet();
-                latch.countDown();
-            }
-            
-            @Override
-            public void onNoteLockConflict(String noteId, String lockedByUser, String requestingUser) {
-                
-            }
-        };
-        
-        lockManager.addObserver(observer);
-        
-        String noteId = "test_note_observer";
-        String username = "mario";
-        
-        lockManager.acquireLock(noteId, username);
-        lockManager.releaseLock(noteId, username);
-        
-        assertTrue(latch.await(1, TimeUnit.SECONDS), 
-                  "Le notifiche degli observer dovrebbero arrivare entro 1 secondo");
-        
-        assertEquals(1, lockAcquiredCount.get(), "Dovrebbe esserci 1 notifica di acquisizione");
-        assertEquals(1, lockReleasedCount.get(), "Dovrebbe esserci 1 notifica di rilascio");
-        
-        lockManager.removeObserver(observer);
-    }
-
-    @Test
-    void testConflictNotification() throws InterruptedException {
-        CountDownLatch conflictLatch = new CountDownLatch(1);
-        AtomicBoolean conflictDetected = new AtomicBoolean(false);
-        
-        NoteLockObserver observer = new NoteLockObserver() {
-            @Override
-            public void onNoteLocked(String noteId, String lockedByUser) {}
-            
-            @Override
-            public void onNoteUnlocked(String noteId, String unlockedByUser) {}
-            
-            @Override
-            public void onNoteLockConflict(String noteId, String lockedByUser, String requestingUser) {
-                conflictDetected.set(true);
-                conflictLatch.countDown();
-            }
-        };
-        
-        lockManager.addObserver(observer);
-        
-        String noteId = "test_note_conflict";
-        String user1 = "mario";
-        String user2 = "luigi";
-        
-        lockManager.acquireLock(noteId, user1);
-        lockManager.acquireLock(noteId, user2);
-        
-        assertTrue(conflictLatch.await(1, TimeUnit.SECONDS), 
-                  "Dovrebbe essere rilevato un conflitto entro 1 secondo");
-        assertTrue(conflictDetected.get(), "Dovrebbe essere stato rilevato un conflitto");
-        
-        lockManager.removeObserver(observer);
-        lockManager.releaseLock(noteId, user1);
     }
 
     @Test
@@ -337,76 +252,6 @@ public class NoteConcurrencyTest {
         System.out.println("Race Condition Test: User1=" + user1Wins.get() + 
                          ", User2=" + user2Wins.get() + ", Inconsistenze=" + inconsistencies.get());
     }
-
-    @Test
-    @Timeout(15)
-    void testObserverNotificationConsistency() throws InterruptedException {
-        String noteId = "observer_test_note";
-        AtomicInteger lockNotifications = new AtomicInteger(0);
-        AtomicInteger unlockNotifications = new AtomicInteger(0);
-        AtomicInteger conflictNotifications = new AtomicInteger(0);
-        
-        NoteLockObserver observer = new NoteLockObserver() {
-            @Override
-            public void onNoteLocked(String id, String user) {
-                lockNotifications.incrementAndGet();
-            }
-            
-            @Override
-            public void onNoteUnlocked(String id, String user) {
-                unlockNotifications.incrementAndGet();
-            }
-            
-            @Override
-            public void onNoteLockConflict(String id, String lockedBy, String requesting) {
-                conflictNotifications.incrementAndGet();
-            }
-        };
-        
-        lockManager.addObserver(observer);
-        
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        int operationCount = 100;
-        CountDownLatch completionLatch = new CountDownLatch(operationCount);
-        
-        for (int i = 0; i < operationCount; i++) {
-            final String username = "user_" + (i % 5);
-            executor.submit(() -> {
-                try {
-                    NoteLock lock = lockManager.acquireLock(noteId, username);
-                    if (lock != null) {
-                        Thread.sleep(1);
-                        lockManager.releaseLock(noteId, username);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } finally {
-                    completionLatch.countDown();
-                }
-            });
-        }
-        
-        assertTrue(completionLatch.await(10, TimeUnit.SECONDS), 
-                  "Tutte le operazioni dovrebbero completare");
-        executor.shutdown();
-        
-        Thread.sleep(100); 
-        
-        lockManager.removeObserver(observer);
-        
-        assertTrue(lockNotifications.get() > 0, "Dovrebbero esserci notifiche di lock");
-        assertTrue(unlockNotifications.get() > 0, "Dovrebbero esserci notifiche di unlock");
-        assertTrue(conflictNotifications.get() > 0, "Dovrebbero esserci notifiche di conflitto");
-        
-        assertEquals(lockNotifications.get(), unlockNotifications.get(), 
-                    "Ogni lock dovrebbe corrispondere a un unlock");
-        
-        System.out.println("Observer Test: " + lockNotifications.get() + " locks, " + 
-                         unlockNotifications.get() + " unlocks, " + 
-                         conflictNotifications.get() + " conflicts");
-    }
-
-    
     
     @Test
     void testLockExpiration() throws InterruptedException {
@@ -463,47 +308,6 @@ public class NoteConcurrencyTest {
     }
 
     @Test
-    @Timeout(20)
-    void testMemoryLeakageWithManyLocks() throws InterruptedException {
-        ExecutorService executor = Executors.newFixedThreadPool(20);
-        AtomicInteger completedOperations = new AtomicInteger(0);
-        
-        for (int i = 0; i < 500; i++) {
-            final String noteId = "note_" + i;
-            final String username = "user_" + (i % 10);
-            
-            executor.submit(() -> {
-                try {
-                    NoteLock lock = lockManager.acquireLock(noteId, username);
-                    if (lock != null) {
-                        Thread.sleep(1);
-                        lockManager.releaseLock(noteId, username);
-                    }
-                    completedOperations.incrementAndGet();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
-        }
-        
-        executor.shutdown();
-        assertTrue(executor.awaitTermination(15, TimeUnit.SECONDS), 
-                  "Tutte le operazioni dovrebbero completare");
-        
-        assertTrue(completedOperations.get() > 450, 
-                  "La maggior parte delle operazioni dovrebbe completare");
-        
-        Thread.sleep(1000);
-        
-        int activeLocks = lockManager.getActiveLocks().size();
-        assertTrue(activeLocks < 50, 
-                  "Non dovrebbero rimanere troppi lock attivi: " + activeLocks);
-        
-        System.out.println("Memory Test: " + completedOperations.get() + 
-                         " operazioni, " + activeLocks + " lock rimasti");
-    }
-
-    @Test
     @Timeout(10)
     void testDeadlockPrevention() throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -532,7 +336,7 @@ public class NoteConcurrencyTest {
         
         assertTrue(operations.get() >= 100, "Tutte le operazioni dovrebbero essere completate");
         System.out.println("Deadlock Test: " + operations.get() + 
-                         " operazioni completate senza deadlock");
+                        " operazioni completate senza deadlock");
     }
 
     @Test

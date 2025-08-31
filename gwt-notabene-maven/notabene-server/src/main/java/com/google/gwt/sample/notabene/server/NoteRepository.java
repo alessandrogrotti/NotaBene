@@ -76,8 +76,6 @@ public class NoteRepository {
         }
     }
 
-
-
     public boolean noteExists(String noteId) {
         try {
             return notesMap.containsKey(noteId);
@@ -88,9 +86,6 @@ public class NoteRepository {
         }
     }
     
-
-
-
     public void printAllNotes() {
         System.out.println("=== ELENCO NOTE NEL DATABASE ===");
         for (Note note : notesMap.values()) {

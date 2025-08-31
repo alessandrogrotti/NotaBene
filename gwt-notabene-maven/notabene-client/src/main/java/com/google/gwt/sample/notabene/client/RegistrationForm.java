@@ -37,7 +37,8 @@ public class RegistrationForm {
         nameBox.setStyleName("form-input");
         surnameBox.setStyleName("form-input");
         confirmButton.setStyleName("form-button");
-    backButton.setStyleName("back-button form-cancel-lower");
+        backButton.setStyleName("form-button");
+        
         panel.add(registerTitle);
         panel.add(usernameLabel);
         panel.add(usernameBox);
@@ -47,8 +48,11 @@ public class RegistrationForm {
         panel.add(nameBox);
         panel.add(surnameLabel);
         panel.add(surnameBox);
+        
         HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setSpacing(10);
+        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
+        buttonPanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
+        buttonPanel.setSpacing(15);
         buttonPanel.add(confirmButton);
         buttonPanel.add(backButton);
         panel.add(buttonPanel);

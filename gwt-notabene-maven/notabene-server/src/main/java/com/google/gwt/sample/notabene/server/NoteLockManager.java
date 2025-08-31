@@ -10,10 +10,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+// Gestore dei lock delle note
 public class NoteLockManager {
 
     private static final NoteLockManager INSTANCE = new NoteLockManager();
 
+    // Creazione della mappa dei lock attivi
     private final ConcurrentHashMap<String, NoteLock> activeLocks = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<NoteLockObserver> observers = new CopyOnWriteArrayList<>();
     private final ScheduledExecutorService janitor = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -30,6 +32,7 @@ public class NoteLockManager {
         return INSTANCE;
     }
 
+    // Acquisizione
     public NoteLock acquireLock(String noteId, String username) {
         if (noteId == null || username == null) return null;
 
@@ -60,6 +63,7 @@ public class NoteLockManager {
         }
     }
 
+    // Rilascio
     public boolean releaseLock(String noteId, String username) {
         if (noteId == null || username == null) return false;
 
@@ -74,6 +78,7 @@ public class NoteLockManager {
         return false;
     }
 
+    // Controllo
     public NoteLock checkLock(String noteId) {
         if (noteId == null) return null;
         NoteLock lock = activeLocks.get(noteId);
@@ -86,6 +91,7 @@ public class NoteLockManager {
         return lock;
     }
 
+    // Rinnovo
     public boolean renewLock(String noteId, String username) {
         if (noteId == null || username == null) return false;
         NoteLock lock = activeLocks.get(noteId);
@@ -96,6 +102,7 @@ public class NoteLockManager {
         return false;
     }
 
+    // Forzare la release 
     public boolean forceReleaseLock(String noteId, String requestingUser, boolean isOwner) {
         if (noteId == null || requestingUser == null) return false;
         NoteLock lock = activeLocks.get(noteId);

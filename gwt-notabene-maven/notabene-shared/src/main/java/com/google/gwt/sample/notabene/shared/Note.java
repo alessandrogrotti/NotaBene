@@ -11,7 +11,6 @@ public class Note implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
-    // Dati della nota
     private String id;
     private String title;
     private String content;
@@ -22,8 +21,6 @@ public class Note implements Serializable {
     private NotePermission permission;
     private Set<String> readOnlyUsers;
     private Set<String> writeUsers;
-    
-    // Versionamento
     private String currentVersionId;
     private int versionNumber;
     private String editorUsername;
@@ -53,41 +50,67 @@ public class Note implements Serializable {
     }
     
     public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+
+    public void setId(String id) { 
+        this.id = id; 
+    }
     
     public String getTitle() { return title; }
+
     public void setTitle(String title) { 
         this.title = title;
         this.lastModified = new Date();
     }
 
     public String getContent() { return content; }
+
     public void setContent(String content) { 
         this.content = content;
         this.lastModified = new Date();
     }
     
     public String getOwnerUsername() { return ownerUsername; }
-    public void setOwnerUsername(String ownerUsername) { this.ownerUsername = ownerUsername; }
-    
+
+    public void setOwnerUsername(String ownerUsername) { 
+        this.ownerUsername = ownerUsername; 
+    }
+
     public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
-    
+
+    public void setCreatedAt(Date createdAt) { 
+        this.createdAt = createdAt; 
+    }
+
     public Date getLastModified() { return lastModified; }
-    public void setLastModified(Date lastModified) { this.lastModified = lastModified; }
+
+    public void setLastModified(Date lastModified) { 
+        this.lastModified = lastModified; 
+    }
 
     public Set<String> getTags() { return tags; }
-    public void setTags(Set<String> tags) { this.tags = tags; }
-    
+
+    public void setTags(Set<String> tags) { 
+        this.tags = tags; 
+    }
+
     public NotePermission getPermission() { return permission; }
-    public void setPermission(NotePermission permission) { this.permission = permission; }
-    
+
+    public void setPermission(NotePermission permission) { 
+        this.permission = permission; 
+    }
+
     public Set<String> getReadOnlyUsers() { return readOnlyUsers; }
-    public void setReadOnlyUsers(Set<String> readOnlyUsers) { this.readOnlyUsers = readOnlyUsers; }
-    
+
+    public void setReadOnlyUsers(Set<String> readOnlyUsers) { 
+        this.readOnlyUsers = readOnlyUsers; 
+    }
+
     public Set<String> getWriteUsers() { return writeUsers; }
-    public void setWriteUsers(Set<String> writeUsers) { this.writeUsers = writeUsers; }
-    
+
+    public void setWriteUsers(Set<String> writeUsers) { 
+        this.writeUsers = writeUsers; 
+    }
+
     public void addTag(String tag) {
         this.tags.add(tag);
         this.lastModified = new Date();
@@ -132,19 +155,31 @@ public class Note implements Serializable {
     }
     
     public String getCurrentVersionId() { return currentVersionId; }
-    public void setCurrentVersionId(String currentVersionId) { this.currentVersionId = currentVersionId; }
+
+    public void setCurrentVersionId(String currentVersionId) { 
+        this.currentVersionId = currentVersionId; 
+    }
     
     public int getVersionNumber() { return versionNumber; }
-    public void setVersionNumber(int versionNumber) { this.versionNumber = versionNumber; }
-    
+
+    public void setVersionNumber(int versionNumber) { 
+        this.versionNumber = versionNumber; 
+    }
+
     public String getEditorUsername() { return editorUsername; }
-    public void setEditorUsername(String editorUsername) { this.editorUsername = editorUsername; }
+    
+    public void setEditorUsername(String editorUsername) { 
+        this.editorUsername = editorUsername; 
+    }
     
     public List<NoteVersion> getVersions() { 
         return versions != null ? new LinkedList<>(versions) : new LinkedList<>(); 
     }
-    public void setVersions(LinkedList<NoteVersion> versions) { this.versions = versions; }
     
+    public void setVersions(LinkedList<NoteVersion> versions) { 
+        this.versions = versions; 
+    }
+
     public void markAsModified(String editorUsername) {
         this.lastModified = new Date();
         this.editorUsername = editorUsername;

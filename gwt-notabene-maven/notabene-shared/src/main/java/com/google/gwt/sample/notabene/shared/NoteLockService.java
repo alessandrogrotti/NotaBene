@@ -5,6 +5,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("noteLockService")
 public interface NoteLockService extends RemoteService {
+    
     NoteLock acquireLock(String noteId, String username) throws IllegalArgumentException;
     
     boolean releaseLock(String noteId, String username) throws IllegalArgumentException;

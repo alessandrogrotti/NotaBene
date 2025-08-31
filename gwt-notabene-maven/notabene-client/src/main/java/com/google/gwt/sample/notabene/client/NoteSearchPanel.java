@@ -15,7 +15,7 @@ import com.google.gwt.sample.notabene.shared.Tag;
 import com.google.gwt.sample.notabene.shared.TagService;
 import com.google.gwt.sample.notabene.shared.TagServiceAsync;
 import java.util.List;
-import java.util.HashSet;
+
 
 public class NoteSearchPanel extends Composite {
     
@@ -66,7 +66,6 @@ public class NoteSearchPanel extends Composite {
         contentPanel.setSpacing(5);
         contentPanel.setWidth("100%");
         
-        // Centrare tutto il contenuto
         HorizontalPanel contentWrapper = new HorizontalPanel();
         contentWrapper.setWidth("100%");
         contentWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
@@ -111,7 +110,6 @@ public class NoteSearchPanel extends Composite {
         tagGroup.add(tagLabel);
         tagGroup.add(tagListBox);
         
-        // Wrapper per centrare i gruppi nella prima riga
         HorizontalPanel firstRowWrapper = new HorizontalPanel();
         firstRowWrapper.setWidth("100%");
         firstRowWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
@@ -135,7 +133,6 @@ public class NoteSearchPanel extends Composite {
         clearButton = new Button("Pulisci");
         clearButton.setStyleName("clear-search-btn");
         
-        // Wrapper per centrare i bottoni nella seconda riga
         HorizontalPanel secondRowWrapper = new HorizontalPanel();
         secondRowWrapper.setWidth("100%");
         secondRowWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
@@ -153,7 +150,6 @@ public class NoteSearchPanel extends Composite {
         selectedTagsPanel.setVerticalAlignment(HorizontalPanel.ALIGN_MIDDLE);
         selectedTagsPanel.setSpacing(8);
         
-        // Wrapper per centrare i tag selezionati
         HorizontalPanel selectedTagsWrapper = new HorizontalPanel();
         selectedTagsWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
         selectedTagsWrapper.setWidth("100%");
@@ -219,7 +215,6 @@ public class NoteSearchPanel extends Composite {
             filtersTable.getCellFormatter().setHorizontalAlignment(row, col, HasHorizontalAlignment.ALIGN_CENTER);
         }
         
-        // Wrapper per centrare la tabella filtri
         HorizontalPanel filtersTableWrapper = new HorizontalPanel();
         filtersTableWrapper.setHorizontalAlignment(HorizontalPanel.ALIGN_CENTER);
         filtersTableWrapper.setWidth("100%");
@@ -268,12 +263,12 @@ public class NoteSearchPanel extends Composite {
         
         tagListBox.addChangeHandler(event -> {
             int selectedIndex = tagListBox.getSelectedIndex();
-            if (selectedIndex > 0) { // > 0 perché 0 è "-- Tutti i tag --"
+            if (selectedIndex > 0) { // > 0 perché 0 è "Tutti i tag"
                 String selectedTag = tagListBox.getValue(selectedIndex);
                 if (!selectedTag.isEmpty() && !currentFilter.getTags().contains(selectedTag)) {
                     currentFilter.addTag(selectedTag);
                     addTagToSelectedPanel(selectedTag);
-                    tagListBox.setSelectedIndex(0); // Reset alla selezione default
+                    tagListBox.setSelectedIndex(0); 
                     performSearch();
                 }
             }

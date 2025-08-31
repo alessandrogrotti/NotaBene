@@ -10,6 +10,7 @@ import com.google.gwt.sample.notabene.shared.NotePermission;
 import com.google.gwt.sample.notabene.shared.NoteLock;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+// Implementazione del servizio di gestione delle note con supporto ai lock
 public class NoteServiceImpl extends RemoteServiceServlet implements NoteService {
     
     private static final long serialVersionUID = 1L;

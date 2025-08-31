@@ -5,6 +5,7 @@ import com.google.gwt.sample.notabene.shared.NoteLockService;
 import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+// Implementazione del servizio di lock delle note
 public class NoteLockServiceImpl extends RemoteServiceServlet implements NoteLockService {
     
     private static final long serialVersionUID = 1L;
@@ -16,7 +17,8 @@ public class NoteLockServiceImpl extends RemoteServiceServlet implements NoteLoc
         this.noteRepository = NoteRepository.getInstance();
         System.out.println("NoteLockServiceImpl inizializzato");
     }
-    
+
+    // Acquisizione del lock su una nota
     @Override
     public NoteLock acquireLock(String noteId, String username) throws IllegalArgumentException {
         
@@ -67,7 +69,8 @@ public class NoteLockServiceImpl extends RemoteServiceServlet implements NoteLoc
             throw new IllegalArgumentException("Errore durante l'acquisizione del lock: " + e.getMessage());
         }
     }
-    
+
+    // Rilascio del lock su una nota
     @Override
     public boolean releaseLock(String noteId, String username) throws IllegalArgumentException {
         

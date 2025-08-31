@@ -7,7 +7,7 @@ import com.google.gwt.sample.notabene.shared.Note;
 import com.google.gwt.sample.notabene.shared.NoteService;
 import com.google.gwt.sample.notabene.shared.NoteServiceAsync;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import java.util.Date;
+
 
 public class NoteDetailPage {
     private final NoteServiceAsync noteService = GWT.create(NoteService.class);

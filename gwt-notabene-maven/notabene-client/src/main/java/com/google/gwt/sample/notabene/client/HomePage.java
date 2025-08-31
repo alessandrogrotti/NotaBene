@@ -56,7 +56,6 @@ public class HomePage {
         panel.setSpacing(20);
         panel.setWidth("100%");
         if (!isAuthenticated || user == null) {
-            // Creare un pannello con lo stesso stile della pagina di registrazione
             VerticalPanel loginPanel = new VerticalPanel();
             loginPanel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
             loginPanel.setSpacing(20);
@@ -146,7 +145,7 @@ public class HomePage {
         notesTitle.setStyleName("form-title");
         notesPanel.add(notesTitle);
         
-        // Container per le note
+        // container per le note
         VerticalPanel notesContainer = new VerticalPanel();
         notesContainer.setSpacing(10);
         notesContainer.setWidth("100%");

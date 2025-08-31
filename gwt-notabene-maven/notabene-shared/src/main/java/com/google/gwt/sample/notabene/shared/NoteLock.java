@@ -4,6 +4,7 @@ import java.io.Serializable;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class NoteLock implements Serializable, IsSerializable {
+    
     private static final long serialVersionUID = 1L;
     
     private String noteId;

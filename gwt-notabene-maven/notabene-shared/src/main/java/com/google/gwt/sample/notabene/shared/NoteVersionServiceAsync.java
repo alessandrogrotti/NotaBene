@@ -3,6 +3,7 @@ package com.google.gwt.sample.notabene.shared;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.List;
 
+// Interfaccia Asincrona per NoteVersionService utilizzata dal client GWT
 public interface NoteVersionServiceAsync {
     
     void getNoteVersions(String noteId, AsyncCallback<List<NoteVersion>> callback);

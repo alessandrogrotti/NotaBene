@@ -71,7 +71,7 @@ public class CreateNoteForm {
         panel.setHorizontalAlignment(VerticalPanel.ALIGN_CENTER);
         panel.setSpacing(15);
         panel.setWidth("80%");
-        panel.setStyleName("form-container"); // container stilizzato
+        panel.setStyleName("form-container"); 
    
         formTitle.setStyleName("form-title");
         titleLabel.setStyleName("form-label");
@@ -84,7 +84,7 @@ public class CreateNoteForm {
         titleBox.setStyleName("form-input");
         titleBox.setWidth("400px");
         
-        // Controllo in tempo reale per il titolo con limite fisico
+        // Controllo in tempo reale per il titolo con limite caratteri a 50
         titleBox.addKeyUpHandler(event -> {
             String text = titleBox.getText();
             if (text.length() > 50) {
@@ -100,7 +100,7 @@ public class CreateNoteForm {
         contentArea.setCharacterWidth(50);
         contentArea.setVisibleLines(10);
         
-        // Controllo in tempo reale per il contenuto con limite fisico 
+        // Controllo in tempo reale per il contenuto con limite caratteri a 280
         contentArea.addKeyUpHandler(event -> {
             String text = contentArea.getText();
             if (text.length() > 280) {
@@ -213,7 +213,7 @@ public class CreateNoteForm {
             @Override
             public void onFailure(Throwable caught) {
                 System.err.println("Errore nel caricamento utenti: " + caught.getMessage());
-                // In caso di errore, lascia la lista vuota
+                // in caso di errore nel caricamento la piattaforma non si rompe, lasciamo lista utenti vuota
                 availableUsers = new ArrayList<>();
                 updateUsersDisplay();
             }
@@ -388,7 +388,7 @@ public class CreateNoteForm {
         writeUsersLabel.setVisible(showWriteSection);
         selectedWriteUsersFlow.setVisible(showWriteSection);
         
-        // Aggiorna la visualizzazione degli utenti
+        // aggiorna la visualizzazione degli utenti
         updateUsersDisplay();
     }
 
@@ -415,7 +415,7 @@ public class CreateNoteForm {
         updateSelectedUsersDisplay();
         updateUserSectionVisibility();
         
-        // Aggiorna i conteggi caratteri
+        // aggiorna i conteggi caratteri
         updateTitleCount();
         updateContentCount();
     }

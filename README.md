@@ -25,6 +25,10 @@ mvn -U jetty:run -pl notabene-server -am -Denv=dev
 ### 3. Accesso
 Aprire il browser su: `http://localhost:8080/`
 
+**Utenti attivi**:
+- username: mdinelli , password: 1234
+- username: fverdi , password: 4321
+
 ## Sviluppo
 
 - **Modifiche frontend**: Refresh del browser per aggiornare

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	version="3.1" metadata-complete="false">
+
+	<!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>NotaBene.html</welcome-file>
+  </welcome-file-list>
+
+  <!-- User Service Servlet -->
+  <servlet>
+    <servlet-name>userService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.UserServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>userService</servlet-name>
+    <url-pattern>/app/userService</url-pattern>
+  </servlet-mapping>
+
+    <!-- Tag Service Servlet -->
+  <servlet>
+    <servlet-name>tagService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.TagServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>tagService</servlet-name>
+    <url-pattern>/app/tagService</url-pattern>
+  </servlet-mapping>
+
+  <!-- Note Service Servlet -->
+  <servlet>
+    <servlet-name>noteService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.NoteServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>noteService</servlet-name>
+    <url-pattern>/app/noteService</url-pattern>
+  </servlet-mapping>
+
+  <!-- Note Lock Service Servlet -->
+  <servlet>
+    <servlet-name>noteLockService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.NoteLockServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>noteLockService</servlet-name>
+    <url-pattern>/app/noteLockService</url-pattern>
+  </servlet-mapping>
+
+  <!-- Note Version Service Servlet -->
+  <servlet>
+    <servlet-name>noteVersionService</servlet-name>
+    <servlet-class>com.google.gwt.sample.notabene.server.NoteVersionServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>noteVersionService</servlet-name>
+    <url-pattern>/app/noteVersionService</url-pattern>
+  </servlet-mapping>
+
+</web-app>
